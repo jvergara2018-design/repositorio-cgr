@@ -62,6 +62,9 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .filtros label{display:block;font-size:.8rem;font-weight:600;color:var(--gris);margin-bottom:4px}
 .filtros input,.filtros select{width:100%;height:42px;padding:0 10px;border:1px solid var(--borde);border-radius:6px;background:var(--blanco);font-size:.95rem}
 .etiqueta.base{background:#E8F1EA;color:#25633A}
+.enlace-estado{font-size:.85rem;margin:0 0 8px;color:var(--gris,#5b6575)}
+.enlace-estado.oficial_directo{color:#25633A;font-weight:600}
+.como-ubicar{font-size:.9rem;margin:8px 0;background:#F4F6F9;padding:8px 10px;border-radius:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .chips button{background:var(--azul-claro);color:var(--azul);border:0;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:600;cursor:pointer}
 
@@ -469,6 +472,13 @@ function ediciones(){
   }).join("") : '<div class="panel vacio">Aún no hay boletines publicados.</div>';
 }
 
+var ESTADO_ENLACE = {
+  oficial_directo: "✓ Enlace directo al documento en la fuente oficial (verificado).",
+  oficial_formato: "Enlace oficial armado con el formato estándar del sitio; si no abre, usa los pasos de «Cómo ubicarlo».",
+  oficial_busqueda: "La fuente oficial no tiene enlace directo por documento: abre el sitio y sigue los pasos.",
+  secundaria: "Solo disponible en una fuente no oficial.",
+  sin_enlace: "Sin enlace disponible."
+};
 function fila(t, v){ return v ? '<tr><th scope="row">' + t + '</th><td>' + esc(v) + '</td></tr>' : ""; }
 function abrir(id){
   var r = rows.filter(function(x){ return x.id === id; })[0]; if (!r) return;
@@ -488,8 +498,10 @@ function abrir(id){
     + lista2("Artículos", r.articulos) + lista2("Dictámenes y causas relacionados", r.dictamenes_relacionados) + lista2("Materias", r.materias)
     + (sampleFn ? '<div class="panel bloque"><h3>Consultar al abogado<span class="beta">beta</span></h3><p class="texto-gris">Pregunta cómo aplica este documento a un caso tuyo.</p><br><button class="boton" type="button" data-consultar="' + esc(r.id) + '">Consultar sobre este documento</button></div>' : "")
     + '<div class="panel bloque enlaces"><h3>Documento original y fuente</h3>'
-      + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">Abrir el documento original</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
-      + (uf ? '<a href="' + esc(uf) + '" target="_blank" rel="noopener">Ver la fuente (' + esc(r.fuente_nombre || "enlace") + ')</a>' : "") + '</div>'
+      + '<p class="enlace-estado ' + esc(r.enlace_estado || "") + '">' + esc(ESTADO_ENLACE[r.enlace_estado] || "") + '</p>'
+      + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">' + (r.enlace_estado === "oficial_busqueda" ? "Abrir el sitio oficial" : "Abrir el documento oficial") + '</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
+      + (r.como_ubicar ? '<p class="como-ubicar"><strong>Cómo ubicarlo:</strong> ' + esc(r.como_ubicar) + '</p>' : "")
+      + (uf ? '<a href="' + esc(uf) + '" target="_blank" rel="noopener">Ver la fuente complementaria (' + esc(r.fuente_nombre || "enlace") + ')</a>' : "") + '</div>'
     + (mcp ? '<div class="panel bloque"><h3>Mi seguimiento</h3><div class="nota">'
       + '<select id="n-estado" aria-label="Estado">' + ["pendiente","leído","aplicado","no aplica"].map(function(e){ return '<option value="' + e + '"' + (e === n.estado ? " selected" : "") + '>' + cap(e) + '</option>'; }).join("") + '</select>'
       + '<textarea id="n-nota" aria-label="Nota" placeholder="En qué sumarios aplica, qué falta hacer">' + esc(n.nota || "") + '</textarea>'
@@ -613,7 +625,7 @@ $("#f-cat").addEventListener("change", function(){ $("#f-sub").value = ""; opcio
 $("#velo").onclick = cerrar;
 $("#recargar").onclick = cargar;
 $("#copiar").onclick = function(){
-  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","linea_base","etapas","subcategorias","materias","resumen","consecuencias_practicas","url_original","url_fuente"];
+  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","linea_base","etapas","subcategorias","materias","resumen","consecuencias_practicas","url_original","enlace_estado","como_ubicar","url_fuente"];
   var q = function(v){ return '"' + String(Array.isArray(v) ? v.join("; ") : (v == null ? "" : v)).replace(/"/g, '""') + '"'; };
   var txt = [cols.join(",")].concat(visibles().map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); })).join("\n");
   var b = $("#copiar");
