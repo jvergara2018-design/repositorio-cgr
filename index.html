@@ -29,7 +29,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cabecera .contenedor{padding-top:22px;padding-bottom:0}
 .cabecera h1{margin:0;font-size:1.5rem;font-weight:700;line-height:1.2}
 .cabecera p{margin:6px 0 16px;color:#C9D5E8;font-size:.95rem;max-width:640px}
-.pestanas{display:flex;gap:4px}
+.pestanas{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.pestanas::-webkit-scrollbar{display:none}
+.pestanas button{white-space:nowrap;flex:0 0 auto}
 .pestanas button{background:none;border:0;color:#C9D5E8;font-weight:600;font-size:1rem;padding:10px 16px;border-radius:6px 6px 0 0;cursor:pointer}
 .pestanas button[aria-selected=true]{background:var(--fondo);color:var(--navy)}
 
@@ -121,6 +123,26 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .plazos .panel{margin-bottom:14px;overflow:hidden}
 .nota-pie{color:var(--gris);font-size:.9rem}
 
+/* Abogado (beta) */
+.beta{display:inline-block;font-size:.7rem;font-weight:700;background:#F4C542;color:#3B2F00;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.pestanas button .beta{margin-left:4px}
+.abogado-intro{padding:18px 20px;margin-bottom:14px}
+.abogado-intro h2{margin:0 0 6px;font-size:1.2rem;color:var(--navy)}
+.abogado-intro p{margin:0 0 6px;color:var(--gris);font-size:.95rem}
+.contexto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:.92rem}
+.contexto select{flex:1;min-width:220px;height:40px;padding:0 8px;border:1px solid var(--borde);border-radius:6px;background:var(--blanco)}
+.conversacion{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.msg{padding:12px 16px;border-radius:10px;max-width:92%;white-space:pre-line;font-size:.97rem}
+.msg.yo{align-self:flex-end;background:var(--azul);color:#fff}
+.msg.abogado{align-self:flex-start;background:var(--blanco);border:1px solid var(--borde)}
+.msg.abogado.pensando{color:var(--gris);font-style:italic}
+.msg.error{align-self:flex-start;background:var(--rojo-f);color:var(--rojo)}
+.sugerencias{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.sugerencias button{background:var(--azul-claro);color:var(--azul);border:0;border-radius:999px;padding:6px 12px;font-size:.88rem;font-weight:600;cursor:pointer;text-align:left}
+.preguntar{padding:12px;display:grid;gap:8px;position:sticky;bottom:0}
+.preguntar textarea{width:100%;min-height:76px;padding:10px;border:1px solid var(--borde);border-radius:6px;font-size:.97rem;resize:vertical}
+.preguntar .fila-btn{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.preguntar small{color:var(--gris);font-size:.82rem}
 footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padding:18px 0 28px}
 
 @media (max-width:820px){
@@ -132,7 +154,9 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   body{font-size:16px}
   .contenedor{padding-left:14px;padding-right:14px}
   .cabecera h1{font-size:1.3rem}
-  .pestanas button{padding:10px 12px}
+  .pestanas{gap:0}
+  .pestanas button{padding:10px 11px;font-size:.95rem}
+  .pestanas button .beta{display:none}
   .boletin{padding:18px}
   .doc{padding:14px}
   .tabla-plazos,.tabla-plazos tbody{display:block}
@@ -154,6 +178,7 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
       <button type="button" role="tab" data-vista="repositorio" aria-selected="true">Repositorio</button>
       <button type="button" role="tab" data-vista="boletines" aria-selected="false">Boletines</button>
       <button type="button" role="tab" data-vista="plazos" aria-selected="false">Plazos</button>
+      <button type="button" role="tab" data-vista="abogado" aria-selected="false" id="tab-abogado" hidden>Abogado<span class="beta">beta</span></button>
     </nav>
   </div>
 </header>
@@ -178,6 +203,21 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   </section>
 
   <section id="v-boletines" hidden><div id="ediciones"></div></section>
+
+  <section id="v-abogado" hidden>
+    <div class="panel abogado-intro">
+      <h2>Consulta al abogado<span class="beta">beta</span></h2>
+      <p>Responde como un abogado experto en derecho administrativo y sumarios, usando los documentos de este repositorio. Es una función en prueba: revisa siempre el documento original antes de aplicar una respuesta.</p>
+      <div class="contexto"><label for="ctx">Sobre:</label><select id="ctx"><option value="">Todo el repositorio</option></select></div>
+    </div>
+    <div class="sugerencias" id="sugerencias"></div>
+    <div class="conversacion" id="conversacion" aria-live="polite"></div>
+    <div class="panel preguntar">
+      <textarea id="pregunta" placeholder="Ej.: Los hechos son de marzo de 2022 y los cargos se formularon en mayo de 2026. ¿Prescribió la acción?"></textarea>
+      <div class="fila-btn"><button class="boton" type="button" id="enviar">Preguntar</button><button class="boton-sec" type="button" id="detener" hidden>Detener</button><button class="boton-sec" type="button" id="nueva">Nueva consulta</button></div>
+      <small>Usa tu cuenta de Claude. La primera vez te pedirá permiso.</small>
+    </div>
+  </section>
 
   <section id="v-plazos" class="plazos" hidden>
     <div class="panel"><table class="tabla-plazos"><caption>Investigación sumaria</caption>
@@ -222,7 +262,8 @@ var SB_URL = "https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1";
 var SB_KEY = "sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe"; // clave pública, solo lectura (RLS)
 var PROJECT = "jlgjaohzmnaxgarjaiog";
 
-var mcp = null, rows = [], bols = [], notas = {}, edicionSel = null, ultimoFoco = null;
+var mcp = null, sampleFn = null, rows = [], bols = [], notas = {}, edicionSel = null, ultimoFoco = null;
+var turnos = [], ctlAbogado = null;
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function fecha(d, largo){ if (!d) return ""; return new Date(d + "T12:00:00").toLocaleDateString("es-CL", largo ? {day:"numeric", month:"long", year:"numeric"} : {day:"numeric", month:"short", year:"numeric"}); }
@@ -281,7 +322,7 @@ function cargar(){
   });
 }
 
-function render(){ boletin(); opciones(); lista(); ediciones(); }
+function render(){ boletin(); opciones(); lista(); ediciones(); opcionesAbogado(); }
 
 function lineas(t){ return (t || "").split("\n").map(function(s){ return s.replace(/^[•\-\s]+|^\d+\)\s*/g, "").trim(); }).filter(Boolean); }
 
@@ -374,6 +415,7 @@ function abrir(id){
     + (r.criterio ? '<div class="panel bloque"><h3>Criterio jurídico</h3><p>' + esc(r.criterio) + '</p></div>' : "")
     + (r.consecuencias_practicas ? '<div class="panel bloque practica"><h3>Qué significa para tus sumarios</h3><p>' + esc(r.consecuencias_practicas) + '</p></div>' : "")
     + lista2("Artículos", r.articulos) + lista2("Dictámenes y causas relacionados", r.dictamenes_relacionados) + lista2("Materias", r.materias)
+    + (sampleFn ? '<div class="panel bloque"><h3>Consultar al abogado<span class="beta">beta</span></h3><p class="texto-gris">Pregunta cómo aplica este documento a un caso tuyo.</p><br><button class="boton" type="button" data-consultar="' + esc(r.id) + '">Consultar sobre este documento</button></div>' : "")
     + '<div class="panel bloque enlaces"><h3>Documento original y fuente</h3>'
       + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">Abrir el documento original</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
       + (uf ? '<a href="' + esc(uf) + '" target="_blank" rel="noopener">Ver la fuente (' + esc(r.fuente_nombre || "enlace") + ')</a>' : "") + '</div>'
@@ -401,15 +443,85 @@ function guardarNota(id){
     .then(function(){ btn.disabled = false; });
 }
 
+/* ===== Abogado (beta): usa la capacidad "sample" de claude.ai ===== */
+var REGLAS = "Actúas como abogado chileno experto en derecho administrativo y en procedimientos disciplinarios: investigaciones sumarias y sumarios administrativos de la Ley 18.834 (Título V, arts. 119 a 160), Ley 18.883, Ley 18.575, Ley 19.880, Ley 10.336 y Ley 21.643 (Ley Karin). Ayudas a una persona que hace seguimiento y análisis de sumarios.\n\n"
+  + "Reglas:\n- Responde en español de Chile, claro y preciso.\n- Usa primero los DOCUMENTOS DEL REPOSITORIO que se incluyen abajo y cítalos por su número o rol. Puedes usar tu conocimiento general del derecho chileno, pero indica cuando algo no está en el repositorio y conviene verificarlo.\n- Nunca inventes números de dictamen, roles ni fechas.\n- Cita artículos exactos. Los plazos del Título V son de días hábiles (art. 145); si hay fechas, muestra el cálculo y advierte sobre feriados.\n- Estructura: primero la conclusión en 2 a 4 líneas; luego el fundamento; al final una sección \"Qué hacer\" con pasos concretos.\n- Escribe en texto simple, sin tablas ni encabezados con #. Para listas usa líneas que empiecen con \"- \".\n- Si la pregunta no trata de derecho administrativo o sumarios, dilo brevemente.";
+
+function resumenFicha(r, completo){
+  var t = "[" + (r.numero || "sin número") + "] " + r.tipo + ". " + r.titulo + ". Fecha: " + (ordenFecha(r) || "s/f") + ". Efecto: " + (r.efecto_jurisprudencial || "-") + ".";
+  t += "\nCriterio: " + (r.criterio || r.resumen || "");
+  if (completo) t += "\nResumen: " + (r.resumen || "") + "\nConsecuencias prácticas: " + (r.consecuencias_practicas || "") + "\nArtículos: " + (r.articulos || []).join(", ") + "\nRelacionados: " + (r.dictamenes_relacionados || []).join(", ");
+  return t;
+}
+function contexto(){
+  var id = $("#ctx").value, foco = id ? rows.filter(function(x){ return x.id === id; })[0] : null;
+  var partes = [];
+  if (foco) partes.push("DOCUMENTO PRINCIPAL DE LA CONSULTA:\n" + resumenFicha(foco, true));
+  partes.push("DOCUMENTOS DEL REPOSITORIO:\n" + rows.filter(function(r){ return !foco || r.id !== foco.id; }).map(function(r){ return resumenFicha(r, !foco); }).join("\n\n"));
+  var txt = partes.join("\n\n");
+  return txt.length > 60000 ? txt.slice(0, 60000) + "\n[...]" : txt;
+}
+function opcionesAbogado(){
+  if (!sampleFn) return;
+  var sel = $("#ctx"), cur = sel.value;
+  sel.innerHTML = '<option value="">Todo el repositorio</option>' + rows.slice().sort(function(a, b){ return ordenFecha(b).localeCompare(ordenFecha(a)); }).map(function(r){ return '<option value="' + esc(r.id) + '"' + (r.id === cur ? " selected" : "") + '>' + esc((r.numero || "Sin número") + " · " + r.titulo).slice(0, 110) + '</option>'; }).join("");
+  sugerencias();
+}
+function sugerencias(){
+  var id = $("#ctx").value, s;
+  if (turnos.length) { $("#sugerencias").innerHTML = ""; return; }
+  s = id ? ["¿Cómo aplico este documento en un sumario en curso?", "¿Qué plazos o riesgos debo controlar según este documento?", "¿Qué cambia respecto del criterio anterior?"]
+         : ["¿Qué debo revisar si tengo un funcionario suspendido hace más de 60 días hábiles?", "¿Cuándo prescribe la acción disciplinaria y cómo se suspende?", "¿Puedo entregar copia de un sumario por transparencia?"];
+  $("#sugerencias").innerHTML = s.map(function(x){ return '<button type="button" data-sugerencia="' + esc(x) + '">' + esc(x) + '</button>'; }).join("");
+}
+function formatoRespuesta(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/^#+\s*/gm, ""); }
+function pintarConversacion(parcial){
+  var html = turnos.map(function(t){ return '<div class="msg ' + (t.role === "user" ? "yo" : "abogado") + '">' + (t.role === "user" ? esc(t.content) : formatoRespuesta(t.content)) + '</div>'; }).join("");
+  if (parcial != null) html += '<div class="msg abogado' + (parcial ? "" : " pensando") + '">' + (parcial ? formatoRespuesta(parcial) : "Analizando…") + '</div>';
+  $("#conversacion").innerHTML = html;
+}
+function errSample(e){
+  var c = e && e.code;
+  if (c === "not_granted" || c === "sampling_disabled" || c === "not_declared" || c === "capability_disabled" || c === "capability_removed") return "La consulta al abogado no está disponible en esta vista (no se dio el permiso o tu cuenta no lo permite).";
+  if (c === "rate_limited") return "Se alcanzó el límite de consultas por ahora. Intenta de nuevo en unos minutos.";
+  if (c === "session_expired") return "Tu sesión de Claude expiró. Vuelve a iniciar sesión y recarga la página.";
+  if (c === "prompt_too_large") return "La consulta es demasiado larga. Elige un documento específico o acorta la pregunta.";
+  if (c === "refused") return "No se pudo responder esta consulta. Reformúlala.";
+  return "La respuesta se interrumpió. Pulsa «Preguntar» para intentar de nuevo.";
+}
+function preguntar(){
+  var q = $("#pregunta").value.trim(); if (!q || !sampleFn || ctlAbogado) return;
+  turnos.push({role: "user", content: q}); $("#pregunta").value = ""; $("#sugerencias").innerHTML = "";
+  pintarConversacion("");
+  ctlAbogado = new AbortController();
+  $("#enviar").disabled = true; $("#detener").hidden = false;
+  var historial = turnos.slice(-8);
+  var input = [{role: "user", content: REGLAS + "\n\n" + contexto() + "\n\nA continuación, la consulta."}].concat(historial);
+  sampleFn(input, {cache: false, signal: ctlAbogado.signal, onText: function(u){ pintarConversacion(u.text); }})
+    .then(function(r){ turnos.push({role: "assistant", content: r.text + (r.truncated ? "\n\n(Respuesta cortada por largo: pide que continúe.)" : "")}); pintarConversacion(); })
+    .catch(function(e){
+      if (e && e.text) turnos.push({role: "assistant", content: e.text + "\n\n(Respuesta interrumpida.)"});
+      else turnos.pop();
+      pintarConversacion();
+      if (!e || e.code !== "cancelled") $("#conversacion").insertAdjacentHTML("beforeend", '<div class="msg error">' + esc(errSample(e)) + '</div>');
+      if (e && !e.text && e.code !== "cancelled") $("#pregunta").value = q;
+    })
+    .then(function(){ ctlAbogado = null; $("#enviar").disabled = false; $("#detener").hidden = true; });
+}
+function nuevaConsulta(){ if (ctlAbogado) ctlAbogado.abort(); turnos = []; pintarConversacion(); sugerencias(); }
+
 function vista(v){
-  if (["repositorio","boletines","plazos"].indexOf(v) < 0) v = "repositorio";
+  var vistas = ["repositorio","boletines","plazos"]; if (sampleFn) vistas.push("abogado");
+  if (vistas.indexOf(v) < 0) v = "repositorio";
   document.querySelectorAll(".pestanas button").forEach(function(b){ b.setAttribute("aria-selected", b.getAttribute("data-vista") === v ? "true" : "false"); });
-  ["repositorio","boletines","plazos"].forEach(function(x){ $("#v-" + x).hidden = x !== v; });
+  ["repositorio","boletines","plazos","abogado"].forEach(function(x){ $("#v-" + x).hidden = x !== v; });
 }
 document.querySelectorAll(".pestanas button").forEach(function(b){ b.onclick = function(){ var v = b.getAttribute("data-vista"); location.hash = v; vista(v); }; });
 window.addEventListener("hashchange", function(){ vista(location.hash.slice(1)); });
 document.addEventListener("click", function(e){
-  var t = e.target.closest("[data-id],[data-edicion],[data-ir],[data-quitar],[data-limpiar]"); if (!t) return;
+  var t = e.target.closest("[data-id],[data-edicion],[data-ir],[data-quitar],[data-limpiar],[data-consultar],[data-sugerencia]"); if (!t) return;
+  if (t.hasAttribute("data-consultar")) { cerrar(); $("#ctx").value = t.getAttribute("data-consultar"); nuevaConsulta(); location.hash = "abogado"; vista("abogado"); return $("#pregunta").focus(); }
+  if (t.hasAttribute("data-sugerencia")) { $("#pregunta").value = t.getAttribute("data-sugerencia"); return preguntar(); }
   if (t.hasAttribute("data-id")) return abrir(t.getAttribute("data-id"));
   if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
   if (t.hasAttribute("data-ir")) { var v = t.getAttribute("data-ir"); location.hash = v; return vista(v); }
@@ -431,11 +543,22 @@ $("#copiar").onclick = function(){
   (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function(){ b.textContent = "Tabla copiada"; }, function(){ b.textContent = "No se pudo copiar"; })
     .then(function(){ setTimeout(function(){ b.textContent = "Copiar tabla (CSV)"; }, 2000); });
 };
+$("#enviar").onclick = preguntar;
+$("#detener").onclick = function(){ if (ctlAbogado) ctlAbogado.abort(); };
+$("#nueva").onclick = nuevaConsulta;
+$("#ctx").addEventListener("change", nuevaConsulta);
+$("#pregunta").addEventListener("keydown", function(e){ if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) preguntar(); });
 vista(location.hash.slice(1));
 
 (function(){
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("mcp").then(function(m){ mcp = m || null; }, function(){ mcp = null; }).then(cargar);
+    window.claude.use("sample").then(function(s){
+      if (!s) return;
+      sampleFn = s; $("#tab-abogado").hidden = false; opcionesAbogado();
+      if (location.hash.slice(1) === "abogado") vista("abogado");
+      if (!$("#ficha").hidden) { var t = $("#ficha-titulo"); }
+    }, function(){});
   } else { cargar(); }
 })();
 </script>
