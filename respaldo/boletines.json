@@ -1,0 +1,28 @@
+[
+ {
+  "alertas": "• Revisar hoy los sumarios con funcionarios suspendidos y registrar las resoluciones en SIAD.\n• Si hay funcionarios suspendidos por más de un año: 15 días hábiles para informar a la CGR (CIC 25).\n• Incorporar al seguimiento las 3 fechas críticas: hecho, vencimiento de la instrucción e interposición de recursos.\n• Denuncias de Ley Karin contra el alcalde, concejales o jefaturas directas: informar a la CGR en 3 días hábiles (D73N26).",
+  "busquedas_realizadas": "Carga inicial y verificación de números en la Base de Dictámenes de contraloria.cl (a través del buscador web), Diario Oficial y prensa jurídica.",
+  "created_at": "2026-11-01T13:20:06.988269+00:00",
+  "destacados": "1) Reapertura de sumarios con destitución: ya no obliga a reincorporar ni pagar remuneraciones (rige para reaperturas desde el 16-09-2026).\n2) Recursos del art. 141: deben resolverse en un máximo de 30 días hábiles.\n3) Suspensión preventiva: registro en SIAD dentro de tercero día y alerta sobre los 60 días hábiles.\n4) Prescripción: los 4 años corren hasta la resolución que absuelve o sanciona, sin contar la fase recursiva ni la toma de razón.",
+  "dictamen_ids": [
+   "in29-2026",
+   "cic25-2026",
+   "reserva-art137",
+   "re14532-2026",
+   "res510-2013",
+   "karin-honorarios-2026",
+   "control-municipal-2026",
+   "d320-2026",
+   "d254-2026",
+   "cs-supereduc-2026",
+   "cese-funciones-2026",
+   "ley-21643",
+   "cs-6305-2026",
+   "cs-57797-2025",
+   "cs-41498-2025"
+  ],
+  "fecha": "2026-11-01",
+  "resumen": "Primera carga del repositorio. Lo más importante de los últimos meses es el Instructivo IN29/2026 (16-09-2026). La CGR unifica sus criterios sobre suspensión preventiva, plazos, prescripción y reapertura, y deja sin efecto el dictamen 17.500/2016. Va acompañado del CIC N° 25, que detectó 485 funcionarios suspendidos (30 por más de tres años), sumarios que pasan a la CGR. También se incluyen el criterio vigente sobre el secreto del art. 137, Ley Karin y jurisprudencia judicial reciente.",
+  "titulo": "Edición inaugural: el Instructivo IN29/2026 cambia el control de los sumarios"
+ }
+]
