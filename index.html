@@ -61,6 +61,7 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .filtros{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;padding:14px;margin-bottom:12px}
 .filtros label{display:block;font-size:.8rem;font-weight:600;color:var(--gris);margin-bottom:4px}
 .filtros input,.filtros select{width:100%;height:42px;padding:0 10px;border:1px solid var(--borde);border-radius:6px;background:var(--blanco);font-size:.95rem}
+.etiqueta.base{background:#E8F1EA;color:#25633A}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .chips button{background:var(--azul-claro);color:var(--azul);border:0;border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:600;cursor:pointer}
 
@@ -210,6 +211,7 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
       <div><label for="f-materia">Materia</label><select id="f-materia"><option value="">Todas</option></select></div>
       <div><label for="f-tipo">Tipo</label><select id="f-tipo"><option value="">Todos</option></select></div>
       <div><label for="f-prio">Prioridad</label><select id="f-prio"><option value="">Todas</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select></div>
+      <div><label for="f-origen">Origen</label><select id="f-origen"><option value="">Todos</option><option value="base">Línea base</option><option value="nuevo">Novedades</option></select></div>
       <div id="campo-seg" hidden><label for="f-seg">Mi seguimiento</label><select id="f-seg"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="leído">Leído</option><option value="aplicado">Aplicado</option><option value="no aplica">No aplica</option></select></div>
       <div id="campo-orden"><label for="f-orden">Ordenar</label><select id="f-orden"><option value="fecha">Más recientes</option><option value="prioridad">Prioridad</option></select></div>
     </div>
@@ -376,7 +378,7 @@ function opciones(){
 }
 
 function visibles(){
-  var q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, s = mcp ? $("#f-seg").value : "";
+  var q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, o = $("#f-origen").value, s = mcp ? $("#f-seg").value : "";
   var ed = null;
   if (edicionSel) { var b = bols.filter(function(x){ return x.fecha === edicionSel; })[0]; ed = b ? (b.dictamen_ids || []) : []; }
   var v = rows.filter(function(r){
@@ -385,6 +387,8 @@ function visibles(){
     if (m && (r.materias || []).indexOf(m) < 0) return false;
     if (etapaSel && (r.etapas || []).indexOf(etapaSel) < 0) return false;
     if (p && r.prioridad !== p) return false;
+    if (o === "base" && !r.linea_base) return false;
+    if (o === "nuevo" && r.linea_base) return false;
     if (s && ((notas[r.id] && notas[r.id].estado) || "pendiente") !== s) return false;
     if (q) {
       var h = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, r.organo, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" ")].join(" ").toLowerCase();
@@ -405,7 +409,7 @@ function lista(){
     var est = mcp ? ((notas[r.id] && notas[r.id].estado) || "pendiente") : "";
     var f = fecha(ordenFecha(r));
     return '<article class="panel doc p-' + esc(r.prioridad) + '" data-id="' + esc(r.id) + '" tabindex="0" role="button" aria-label="Abrir ficha: ' + esc(r.titulo) + '">'
-      + '<div class="doc-top"><span class="etiqueta">' + esc(r.tipo) + '</span><span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (est ? '<span class="seg">' + esc(cap(est)) + '</span>' : "") + '</div>'
+      + '<div class="doc-top"><span class="etiqueta">' + esc(r.tipo) + '</span>' + (r.linea_base ? '<span class="etiqueta base">Línea base</span>' : "") + '<span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (est ? '<span class="seg">' + esc(cap(est)) + '</span>' : "") + '</div>'
       + '<h3>' + esc(r.titulo) + '</h3>'
       + '<p class="num"><strong>' + esc(r.numero || "Sin número") + '</strong>' + (f ? " · " + esc(f) : "") + '</p>'
       + '<p class="res">' + esc(r.resumen) + '</p>'
@@ -435,7 +439,7 @@ function abrir(id){
     + '<div class="ficha-cuerpo">'
     + '<div class="panel bloque"><div class="doc-top"><span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (r.efecto_jurisprudencial ? '<span class="etiqueta">' + esc(r.efecto_jurisprudencial) + '</span>' : "") + '</div>'
     + '<h2 id="ficha-titulo">' + esc(r.titulo) + '</h2>'
-    + '<table class="datos">' + fila("Número o rol", r.numero || "Sin número") + fila("Etapa del sumario", (r.etapas || []).join(", ")) + fila("Órgano", r.organo) + fila("Fecha del documento", fecha(r.fecha_documento, true)) + fila("Publicación", fecha(r.fecha_publicacion, true)) + fila("Ingreso al repositorio", fecha(r.fecha_ingreso, true)) + '</table>'
+    + '<table class="datos">' + fila("Número o rol", r.numero || "Sin número") + fila("Etapa del sumario", (r.etapas || []).join(", ")) + fila("Origen", r.linea_base ? "Línea base normativa y jurisprudencial" : "Novedad (boletín)") + fila("Órgano", r.organo) + fila("Fecha del documento", fecha(r.fecha_documento, true)) + fila("Publicación", fecha(r.fecha_publicacion, true)) + fila("Ingreso al repositorio", fecha(r.fecha_ingreso, true)) + '</table>'
     + (r.numero_verificado ? "" : '<p class="texto-gris">El número o la fecha exacta aún no se confirma en el documento oficial.</p>')
     + '</div>'
     + '<div class="panel bloque"><h3>Resumen</h3><p>' + esc(r.resumen) + '</p></div>'
@@ -476,6 +480,7 @@ var REGLAS = "Actúas como abogado chileno experto en derecho administrativo y e
 
 function resumenFicha(r, completo){
   var t = "[" + (r.numero || "sin número") + "] " + r.tipo + ". " + r.titulo + ". Fecha: " + (ordenFecha(r) || "s/f") + ". Efecto: " + (r.efecto_jurisprudencial || "-") + ".";
+  if (r.linea_base) t += " Línea base (criterio vigente de referencia).";
   if ((r.etapas || []).length) t += " Etapa: " + r.etapas.join(", ") + ".";
   t += "\nCriterio: " + (r.criterio || r.resumen || "");
   if (completo) t += "\nResumen: " + (r.resumen || "") + "\nConsecuencias prácticas: " + (r.consecuencias_practicas || "") + "\nArtículos: " + (r.articulos || []).join(", ") + "\nRelacionados: " + (r.dictamenes_relacionados || []).join(", ");
@@ -556,17 +561,17 @@ document.addEventListener("click", function(e){
   if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
   if (t.hasAttribute("data-ir")) { var v = t.getAttribute("data-ir"); location.hash = v; return vista(v); }
   if (t.hasAttribute("data-quitar")) { edicionSel = null; return lista(); }
-  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-seg"].forEach(function(s){ $(s).value = ""; }); lista(); }
+  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg"].forEach(function(s){ $(s).value = ""; }); lista(); }
 });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("#ficha").hidden) cerrar();
   if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("doc")) { e.preventDefault(); abrir(e.target.getAttribute("data-id")); }
 });
-["#q","#f-tipo","#f-materia","#f-prio","#f-seg","#f-orden"].forEach(function(s){ $(s).addEventListener("input", lista); $(s).addEventListener("change", lista); });
+["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden"].forEach(function(s){ $(s).addEventListener("input", lista); $(s).addEventListener("change", lista); });
 $("#velo").onclick = cerrar;
 $("#recargar").onclick = cargar;
 $("#copiar").onclick = function(){
-  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","etapas","materias","resumen","consecuencias_practicas","url_original","url_fuente"];
+  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","linea_base","etapas","materias","resumen","consecuencias_practicas","url_original","url_fuente"];
   var q = function(v){ return '"' + String(Array.isArray(v) ? v.join("; ") : (v == null ? "" : v)).replace(/"/g, '""') + '"'; };
   var txt = [cols.join(",")].concat(visibles().map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); })).join("\n");
   var b = $("#copiar");
