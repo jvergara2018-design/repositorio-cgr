@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repositorio de Jurisprudencia CGR · Sumarios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef;--panel:#fff;--ink:#1d2329;--muted:#5e6670;--line:#e2ddd2;
+  --accent:#1f4e79;--accent-soft:#e7eef6;--alta:#a8321f;--alta-soft:#f8e6e2;
+  --media:#8a5a00;--media-soft:#f6ecd6;--baja:#3f6b3f;--baja-soft:#e5efe3;
+  --radius:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15191d;--panel:#1d2227;--ink:#e8e6e1;--muted:#9aa3ad;--line:#2f363d;
+  --accent:#7fb0e0;--accent-soft:#1f2e3d;--alta:#f08b78;--alta-soft:#3a2420;
+  --media:#e3b65c;--media-soft:#3a3020;--baja:#8fc58f;--baja-soft:#223322;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif}
+header{padding:22px 20px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-family:"Source Serif 4",Georgia,serif;font-weight:650;font-size:1.55rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:.9rem;margin:0}
+nav{display:flex;gap:4px;margin-top:14px;flex-wrap:wrap}
+nav button{border:0;background:none;padding:8px 12px;border-radius:8px;font:inherit;font-weight:500;color:var(--muted);cursor:pointer}
+nav button[aria-selected=true]{background:var(--accent-soft);color:var(--accent)}
+main{padding:18px 20px 60px}
+.status{font-size:.85rem;color:var(--muted);margin:0 0 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.status button{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer}
+.banner{background:var(--media-soft);color:var(--ink);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:.9rem}
+.banner.err{background:var(--alta-soft)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.filters input,.filters select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 11px;font-size:.8rem;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.count{color:var(--muted);font-size:.85rem;margin-bottom:8px}
+.list{display:grid;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.card:hover{border-color:var(--accent)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.78rem;color:var(--muted);margin-bottom:6px}
+.tag{padding:2px 8px;border-radius:5px;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+.p-alta{background:var(--alta-soft);color:var(--alta)}.p-media{background:var(--media-soft);color:var(--media)}.p-baja{background:var(--baja-soft);color:var(--baja)}
+.tipo{background:var(--accent-soft);color:var(--accent)}
+.efecto{border:1px solid var(--line)}
+.card h3{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.07rem;margin:0 0 6px;line-height:1.35}
+.card p{margin:0;color:var(--muted);font-size:.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.seg{font-size:.75rem;margin-left:auto}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+dialog{border:0;border-radius:14px;padding:0;max-width:760px;width:calc(100% - 24px);background:var(--panel);color:var(--ink);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dhead{padding:18px 44px 10px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.dhead h2{font-family:"Source Serif 4",Georgia,serif;font-size:1.25rem;margin:4px 0 0;line-height:1.3}
+.dbody{padding:14px 20px 20px}
+.dbody h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 4px}
+.dbody p,.dbody li{margin:0;white-space:pre-line}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;font-size:.85rem}
+.facts div{background:var(--bg);border-radius:8px;padding:8px 10px}
+.facts b{display:block;font-size:.72rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.practica{background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.links a{display:inline-block;margin:4px 10px 0 0;color:var(--accent);font-weight:500}
+.close{position:absolute;right:12px;top:12px;z-index:5;border:0;background:none;font-size:1.4rem;color:var(--muted);cursor:pointer}
+.nota{display:grid;gap:8px;margin-top:6px}
+.nota select,.nota textarea{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.nota textarea{min-height:70px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 14px;background:var(--accent);color:#fff;cursor:pointer;justify-self:start}
+.btn:disabled{opacity:.6}
+.small{font-size:.8rem;color:var(--muted)}
+.bol{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.bol h3{font-family:"Source Serif 4",Georgia,serif;margin:2px 0 8px;font-size:1.15rem}
+.bol p{white-space:pre-line;margin:6px 0}
+.bol .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:12px}
+.bol a{color:var(--accent);cursor:pointer;text-decoration:underline}
+table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:var(--radius);overflow:hidden;font-size:.9rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--bg)}
+td:nth-child(2){white-space:nowrap;font-weight:600}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius)}
+.note{font-size:.82rem;color:var(--muted);margin-top:10px}
+@media (max-width:720px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Repositorio de Jurisprudencia CGR</h1>
+  <p class="sub">Dictámenes, normas y criterios para investigaciones sumarias y sumarios administrativos · Ley 18.834 · Se actualiza lunes, miércoles y viernes</p>
+  <nav role="tablist">
+    <button role="tab" data-view="repositorio" aria-selected="true">Repositorio</button>
+    <button role="tab" data-view="boletines" aria-selected="false">Boletines semanales</button>
+    <button role="tab" data-view="plazos" aria-selected="false">Plazos clave</button>
+  </nav>
+</div></header>
+
+<main><div class="wrap">
+  <div id="banner"></div>
+  <div class="status"><span id="estado">Conectando con Supabase…</span><button id="recargar" type="button">Actualizar</button><button id="copiar" type="button">Copiar CSV</button></div>
+
+  <section id="v-repositorio">
+    <div class="filters">
+      <input id="q" type="search" placeholder="Buscar por número, título, artículo o texto…">
+      <select id="f-tipo"><option value="">Todos los tipos</option></select>
+      <select id="f-prio"><option value="">Toda prioridad</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section id="v-boletines" hidden><div id="bols"></div></section>
+
+  <section id="v-plazos" hidden>
+    <div class="tblwrap"><table>
+      <thead><tr><th>Trámite</th><th>Plazo</th><th>Norma / criterio</th></tr></thead>
+      <tbody>
+        <tr><td>Investigación sumaria: investigación</td><td>5 días</td><td>Art. 126 · improrrogable</td></tr>
+        <tr><td>Investigación sumaria: resolución de la autoridad</td><td>2 días</td><td>Art. 126</td></tr>
+        <tr><td>Sumario: investigación del fiscal</td><td>20 días</td><td>Art. 135 · prorrogable hasta 60 días</td></tr>
+        <tr><td>Recusación / implicancia</td><td>2 días</td><td>Arts. 132–134</td></tr>
+        <tr><td>Cierre y formulación de cargos o sobreseimiento</td><td>3 días</td><td>Art. 137</td></tr>
+        <tr><td>Secreto del sumario</td><td>Hasta los cargos</td><td>Art. 137 inc. 2° · después rige la publicidad (dict. 11.341/2010)</td></tr>
+        <tr><td>Descargos</td><td>5 días + 5</td><td>Art. 138 · la prórroga se pide antes del vencimiento</td></tr>
+        <tr><td>Término probatorio</td><td>Hasta 20 días</td><td>Art. 138</td></tr>
+        <tr><td>Dictamen (vista fiscal)</td><td>5 días</td><td>Art. 139</td></tr>
+        <tr><td>Resolución de la autoridad</td><td>5 días</td><td>Art. 140</td></tr>
+        <tr><td>Reposición / apelación</td><td>5 días</td><td>Art. 141 · se fallan en 5 días</td></tr>
+        <tr><td>Plazo máximo para resolver recursos</td><td>30 días hábiles</td><td>IN29/2026 (Ley 19.880 arts. 25 y 59)</td></tr>
+        <tr><td>Registro de la suspensión preventiva en SIAD</td><td>3er día</td><td>IN29/2026</td></tr>
+        <tr><td>Alerta por suspensión prolongada</td><td>&gt; 60 días hábiles</td><td>IN29/2026 · la jefatura pide explicaciones</td></tr>
+        <tr><td>Reclamo ante Contraloría</td><td>10 días hábiles</td><td>Art. 160 · después de agotar los recursos (E220.260/2022)</td></tr>
+        <tr><td>Prescripción de la acción disciplinaria</td><td>4 años</td><td>Arts. 158–159 · se suspende con los cargos; vuelve a correr si se paraliza más de 2 años</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Todos los plazos del Título V son de días hábiles (art. 145). Equivalencias municipales (Ley 18.883): arts. 124, 133, 135, 136, 137, 138, 139, 143, 154–156.</p>
+  </section>
+</div></main>
+
+<dialog id="dlg"><button class="close" type="button" aria-label="Cerrar" id="cerrar">×</button><div id="dlgc"></div></dialog>
+
+<script>
+const SB_URL = "https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1";
+const SB_KEY = "sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe"; // clave pública de solo lectura (RLS)
+let rows = [], bols = [], materiaSel = new Set();
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = d => d ? new Date(d + "T12:00:00").toLocaleDateString("es-CL", {day:"2-digit", month:"short", year:"numeric"}) : "—";
+const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : null;
+
+function store(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function load(k){ try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(e){ return null; } }
+
+async function api(path){
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch(SB_URL + path, { headers: { apikey: SB_KEY, Accept: "application/json" }, signal: ctrl.signal });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+
+function banner(msg, err){ $("#banner").innerHTML = msg ? `<div class="banner ${err ? "err" : ""}">${esc(msg)}</div>` : ""; }
+
+const ordenFecha = r => r.fecha_documento || r.fecha_publicacion || "";
+
+async function cargar(){
+  $("#estado").textContent = "Cargando…";
+  try {
+    const [d, b] = await Promise.all([
+      api("/dictamenes?select=*&order=created_at.desc"),
+      api("/boletines?select=*&order=fecha.desc")
+    ]);
+    rows = d.sort((a, b) => ordenFecha(b).localeCompare(ordenFecha(a)));
+    bols = b;
+    store("cgr-pub-cache", {rows, bols, t: Date.now()});
+    banner("");
+    $("#estado").textContent = `${rows.length} documentos · actualizado ${new Date().toLocaleTimeString("es-CL", {hour:"2-digit", minute:"2-digit"})}`;
+    render();
+  } catch(e) {
+    const c = load("cgr-pub-cache");
+    banner("No se pudo conectar con la base de datos. " + (c ? "Se muestra la última copia guardada en este navegador." : "Revisa tu conexión y pulsa «Actualizar»."), true);
+    if (c && !rows.length) { rows = c.rows; bols = c.bols; render(); }
+    $("#estado").textContent = c ? "Copia guardada del " + new Date(c.t).toLocaleString("es-CL") : "Sin datos";
+  }
+}
+
+function filtros(){
+  const tipos = [...new Set(rows.map(r => r.tipo))].sort();
+  const sel = $("#f-tipo"), cur = sel.value;
+  sel.innerHTML = `<option value="">Todos los tipos</option>` + tipos.map(t => `<option ${t === cur ? "selected" : ""}>${esc(t)}</option>`).join("");
+  const cnt = {};
+  rows.forEach(r => (r.materias || []).forEach(m => cnt[m] = (cnt[m] || 0) + 1));
+  const mats = Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+  $("#chips").innerHTML = mats.map(m => `<button type="button" class="chip ${materiaSel.has(m) ? "on" : ""}" data-m="${esc(m)}">${esc(m)} · ${cnt[m]}</button>`).join("");
+}
+
+function visibles(){
+  const q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, p = $("#f-prio").value;
+  return rows.filter(r => {
+    if (t && r.tipo !== t) return false;
+    if (p && r.prioridad !== p) return false;
+    if (materiaSel.size && ![...materiaSel].every(m => (r.materias || []).includes(m))) return false;
+    if (q) {
+      const hay = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" ")].join(" ").toLowerCase();
+      if (!q.split(/\s+/).every(w => hay.includes(w))) return false;
+    }
+    return true;
+  });
+}
+
+function render(){
+  filtros();
+  const v = visibles();
+  $("#count").textContent = `${v.length} de ${rows.length} documentos`;
+  $("#list").innerHTML = v.length ? v.map(r => {
+    return `<button type="button" class="card" data-id="${esc(r.id)}">
+      <div class="meta"><span class="tag tipo">${esc(r.tipo)}</span><span class="tag p-${esc(r.prioridad)}">${esc(r.prioridad)}</span>
+      ${r.efecto_jurisprudencial ? `<span class="tag efecto">${esc(r.efecto_jurisprudencial)}</span>` : ""}
+      <span>${esc(r.numero || "N° por verificar")}</span><span>· ${fmt(r.fecha_documento || r.fecha_publicacion)}</span></div>
+      <h3>${esc(r.titulo)}</h3><p>${esc(r.resumen)}</p></button>`;
+  }).join("") : `<div class="empty">${rows.length ? "Ningún documento coincide con los filtros." : "Aún no hay documentos cargados."}</div>`;
+  renderBols();
+}
+
+function renderBols(){
+  $("#bols").innerHTML = bols.length ? bols.map(b => `<article class="bol">
+    <div class="small">Boletín del ${fmt(b.fecha)}</div><h3>${esc(b.titulo)}</h3><p>${esc(b.resumen)}</p>
+    ${b.destacados ? `<div class="lbl">Destacados</div><p>${esc(b.destacados)}</p>` : ""}
+    ${b.alertas ? `<div class="lbl">Acciones para el seguimiento</div><p>${esc(b.alertas)}</p>` : ""}
+    ${(b.dictamen_ids || []).length ? `<div class="lbl">Documentos de esta edición</div><p>${b.dictamen_ids.map(id => { const r = rows.find(x => x.id === id); return r ? `<a data-open="${esc(id)}">${esc(r.numero || r.titulo)}</a>` : ""; }).filter(Boolean).join(" · ")}</p>` : ""}
+  </article>`).join("") : `<div class="empty">Todavía no hay boletines. El próximo se publica el lunes, miércoles o viernes.</div>`;
+}
+
+function abrir(id){
+  const r = rows.find(x => x.id === id); if (!r) return;
+  const uo = safeUrl(r.url_original), uf = safeUrl(r.url_fuente);
+  $("#dlgc").innerHTML = `<div class="dhead"><div class="meta"><span class="tag tipo">${esc(r.tipo)}</span><span class="tag p-${esc(r.prioridad)}">Prioridad ${esc(r.prioridad)}</span>${r.efecto_jurisprudencial ? `<span class="tag efecto">${esc(r.efecto_jurisprudencial)}</span>` : ""}</div><h2>${esc(r.titulo)}</h2></div>
+  <div class="dbody">
+    <div class="facts">
+      <div><b>Número</b>${esc(r.numero || "Por verificar")}${r.numero_verificado ? "" : " ⚠︎"}</div>
+      <div><b>Órgano</b>${esc(r.organo)}</div>
+      <div><b>Fecha del documento</b>${fmt(r.fecha_documento)}</div>
+      <div><b>Publicación / difusión</b>${fmt(r.fecha_publicacion)}</div>
+      <div><b>Ingreso al repositorio</b>${fmt(r.fecha_ingreso)}</div>
+    </div>
+    ${r.numero_verificado ? "" : `<p class="small" style="margin-top:8px">⚠︎ El número o la fecha exacta aún no se ha confirmado en el documento oficial.</p>`}
+    <h4>Resumen</h4><p>${esc(r.resumen)}</p>
+    ${r.criterio ? `<h4>Criterio jurídico</h4><p>${esc(r.criterio)}</p>` : ""}
+    ${r.consecuencias_practicas ? `<h4>Consecuencias prácticas para el seguimiento</h4><div class="practica"><p>${esc(r.consecuencias_practicas)}</p></div>` : ""}
+    ${(r.articulos || []).length ? `<h4>Artículos</h4><p>${esc(r.articulos.join(" · "))}</p>` : ""}
+    ${(r.materias || []).length ? `<h4>Materias</h4><p>${esc(r.materias.join(" · "))}</p>` : ""}
+    ${(r.dictamenes_relacionados || []).length ? `<h4>Dictámenes relacionados</h4><p>${esc(r.dictamenes_relacionados.join(" · "))}</p>` : ""}
+    <h4>Documento original y fuente</h4>
+    <div class="links">${uo ? `<a href="${esc(uo)}" target="_blank" rel="noopener">Documento original ↗</a>` : `<span class="small">Documento original: búscalo en contraloria.cl con el número indicado. </span>`}${uf ? `<a href="${esc(uf)}" target="_blank" rel="noopener">Fuente: ${esc(r.fuente_nombre || "ver")} ↗</a>` : ""}</div>
+  </div>`;
+  $("#dlg").showModal();
+}
+
+function csv(){
+  const cols = ["tipo", "numero", "titulo", "organo", "fecha_documento", "fecha_publicacion", "prioridad", "efecto_jurisprudencial", "materias", "resumen", "consecuencias_practicas", "url_original", "url_fuente"];
+  const q = v => `"${String(Array.isArray(v) ? v.join("; ") : (v ?? "")).replace(/"/g, '""')}"`;
+  return [cols.join(","), ...visibles().map(r => cols.map(c => q(r[c])).join(","))].join("\n");
+}
+
+document.addEventListener("click", e => {
+  const card = e.target.closest(".card"); if (card) return abrir(card.dataset.id);
+  const op = e.target.closest("[data-open]"); if (op) return abrir(op.dataset.open);
+  const ch = e.target.closest(".chip");
+  if (ch) { const m = ch.dataset.m; materiaSel.has(m) ? materiaSel.delete(m) : materiaSel.add(m); render(); }
+});
+["#q", "#f-tipo", "#f-prio"].forEach(s => $(s).addEventListener("input", render));
+$("#cerrar").onclick = () => $("#dlg").close();
+$("#dlg").addEventListener("click", e => { if (e.target.id === "dlg") $("#dlg").close(); });
+$("#recargar").onclick = cargar;
+$("#copiar").onclick = async () => { try { await navigator.clipboard.writeText(csv()); $("#copiar").textContent = "Copiado ✓"; } catch(e) { $("#copiar").textContent = "No se pudo copiar"; } setTimeout(() => $("#copiar").textContent = "Copiar CSV", 2000); };
+
+function vista(v){
+  if (!["repositorio", "boletines", "plazos"].includes(v)) v = "repositorio";
+  document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-selected", b.dataset.view === v));
+  document.querySelectorAll("main section").forEach(s => s.hidden = s.id !== "v-" + v);
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { location.hash = b.dataset.view; vista(b.dataset.view); });
+window.addEventListener("hashchange", () => vista(location.hash.slice(1)));
+vista(location.hash.slice(1));
+
+cargar();
+</script>
+</body>
+</html>
