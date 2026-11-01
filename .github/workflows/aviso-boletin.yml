@@ -1,0 +1,98 @@
+name: Aviso de boletín nuevo al teléfono (ntfy)
+
+# Revisa si hay un boletín nuevo en Supabase y, si lo hay, envía una notificación
+# al canal de ntfy. La fecha del último boletín avisado queda en avisos/ultimo-boletin.txt.
+on:
+  schedule:
+    # Lunes, miércoles y viernes, después de la tarea de las 08:17 (hora de Santiago)
+    - cron: "5 12 * * 1,3,5"
+    - cron: "35 13 * * 1,3,5"
+    - cron: "5 17 * * 1,3,5"
+    # Revisión diaria por si un boletín se publica otro día
+    - cron: "5 22 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/aviso-boletin.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aviso-boletin
+  cancel-in-progress: false
+
+jobs:
+  aviso:
+    runs-on: ubuntu-latest
+    env:
+      SB_URL: https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1
+      SB_KEY: sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'cgr-sumarios-ua1sdxy4m5' }}
+      SITIO: https://jvergara2018-design.github.io/repositorio-cgr/
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar boletín y avisar
+        id: aviso
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+
+          def get(path):
+              req = urllib.request.Request(os.environ["SB_URL"] + path, headers={"apikey": os.environ["SB_KEY"], "Accept": "application/json"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return json.load(r)
+
+          bols = get("/boletines?select=fecha,titulo,resumen,destacados,alertas,dictamen_ids&order=fecha.desc&limit=1")
+          if not bols:
+              print("No hay boletines."); raise SystemExit(0)
+          b = bols[0]
+          archivo = "avisos/ultimo-boletin.txt"
+          ultimo = open(archivo).read().strip() if os.path.exists(archivo) else ""
+          if ultimo >= b["fecha"]:
+              print(f"Sin boletín nuevo (último avisado: {ultimo})."); raise SystemExit(0)
+
+          def lineas(t):
+              return [re.sub(r"^\s*(?:[•\-]|\d+[\).])\s*", "", x).strip() for x in (t or "").splitlines() if x.strip()]
+
+          meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+          a, m, d = b["fecha"].split("-")
+          fecha = f"{int(d)} de {meses[int(m)-1]}"
+          dest = lineas(b.get("destacados"))[:4]
+          alert = lineas(b.get("alertas"))[:3]
+          partes = [b["titulo"]]
+          if dest: partes.append("Lo más importante:\n" + "\n".join("• " + x for x in dest))
+          if alert: partes.append("Qué revisar:\n" + "\n".join("• " + x for x in alert))
+          n = len(b.get("dictamen_ids") or [])
+          if n: partes.append(f"{n} documento(s) en esta edición. Toca para abrir el repositorio.")
+          mensaje = "\n\n".join(partes)
+          if len(mensaje) > 3800: mensaje = mensaje[:3800] + "…"
+
+          cuerpo = {
+              "topic": os.environ["NTFY_TOPIC"],
+              "title": f"Boletín CGR · {fecha}",
+              "message": mensaje,
+              "tags": ["scales"],
+              "priority": 4,
+              "click": os.environ["SITIO"] + "#boletines",
+              "actions": [{"action": "view", "label": "Abrir repositorio", "url": os.environ["SITIO"]}],
+          }
+          req = urllib.request.Request("https://ntfy.sh/", data=json.dumps(cuerpo).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+          with urllib.request.urlopen(req, timeout=30) as r:
+              print("ntfy:", r.status)
+          os.makedirs("avisos", exist_ok=True)
+          open(archivo, "w").write(b["fecha"] + "\n")
+          print("Aviso enviado para el boletín del", b["fecha"])
+          PY
+
+      - name: Registrar el último boletín avisado
+        run: |
+          git config user.name "aviso-automatico"
+          git config user.email "aviso-automatico@users.noreply.github.com"
+          git add avisos/
+          if ! git diff --cached --quiet; then
+            git commit -m "Registra aviso del boletín"
+            git pull --rebase
+            git push
+          fi
