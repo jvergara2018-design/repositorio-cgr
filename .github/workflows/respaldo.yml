@@ -1,0 +1,62 @@
+name: Respaldo semanal de la base de datos
+
+# Copia las tablas públicas (dictamenes y boletines) desde Supabase a la carpeta respaldo/.
+# Las notas personales (notas_seguimiento) no se incluyen: la clave pública no puede leerlas.
+on:
+  schedule:
+    - cron: "17 11 * * 0"   # domingos 11:17 UTC (08:17 en Santiago en horario de verano)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/respaldo.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: respaldo
+  cancel-in-progress: false
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    env:
+      SB_URL: https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1
+      SB_KEY: sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar tablas desde Supabase
+        run: |
+          set -euo pipefail
+          mkdir -p respaldo
+          for t in dictamenes boletines; do
+            curl -sSf --retry 3 --retry-delay 10 \
+              -H "apikey: $SB_KEY" -H "Accept: application/json" \
+              "$SB_URL/$t?select=*&order=created_at.asc" -o "respaldo/$t.tmp.json"
+            # Valida que sea un arreglo JSON antes de reemplazar el respaldo anterior
+            python3 -c "import json,sys; d=json.load(open('respaldo/$t.tmp.json')); assert isinstance(d,list); json.dump(d,open('respaldo/$t.json','w'),ensure_ascii=False,indent=1,sort_keys=True); print('$t', len(d))"
+            rm "respaldo/$t.tmp.json"
+          done
+          python3 - <<'PY'
+          import json, datetime
+          d = json.load(open("respaldo/dictamenes.json")); b = json.load(open("respaldo/boletines.json"))
+          open("respaldo/ULTIMO-RESPALDO.md", "w").write(
+              "# Último respaldo\n\n"
+              f"- Fecha (UTC): {datetime.datetime.utcnow():%Y-%m-%d %H:%M}\n"
+              f"- Dictámenes y documentos: {len(d)}\n"
+              f"- Boletines: {len(b)}\n\n"
+              "Para restaurar, cargar estos JSON en las tablas public.dictamenes y public.boletines de Supabase.\n")
+          PY
+
+      - name: Guardar en el repositorio si hubo cambios
+        run: |
+          git config user.name "respaldo-automatico"
+          git config user.email "respaldo-automatico@users.noreply.github.com"
+          git add respaldo/
+          if git diff --cached --quiet; then
+            echo "Sin cambios desde el último respaldo."
+          else
+            git commit -m "Respaldo semanal de dictámenes y boletines"
+            git push
+          fi
