@@ -1,0 +1,195 @@
+﻿CATEGORÍAS Y SUBCATEGORÍAS DE LOS SUMARIOS
+Gestor Jurídico — catálogo incorporado en versión 0.14.0
+16 categorías y 152 subcategorías.
+Se transcribe el catálogo de la aplicación; no es una verificación de vigencia normativa.
+
+1. CONTABLES, PRESUPUESTARIAS Y FINANCIERAS
+   1.1. Pago indebido de asignaciones
+   1.2. Ejecución presupuestaria
+   1.3. Omisiones en rendiciones de cuentas
+   1.4. Transferencias a terceros
+   1.5. Devengamiento gastos
+   1.6. Cheques girados y no cobrados
+   1.7. Observaciones a conciliación bancaria
+   1.8. Imputación errónea
+   1.9. Documentos tributarios, contables y otros títulos valores adulterados
+   1.10. Incumplimiento en los procesos de cobranza de deudas
+   1.11. Gastos improcedentes
+   1.12. Irregularidad en el activo fijo
+   1.13. Déficit presupuestario y financiero
+   1.14. Incumplimiento de normativa contable y presupuestaria
+   1.15. Uso indebido de fondos públicos
+   1.16. Montos pagados en exceso sin reintegrar
+   1.17. Incumplimiento instrucciones de CGR en materia contable
+   1.18. Otras irregularidades en materias contables, presupuestarias y/o financieras
+
+2. EDUCACIÓN
+   2.1. Otorgamiento irregular de becas
+   2.2. Otorgamiento irregular de subvenciones
+   2.3. Otorgamiento del beneficio por Gracia, para autorizar la continuación de estudios y el ingreso a un programa especial de licenciatura
+   2.4. Incumplimiento de celebración de convenio docente asistencial
+   2.5. Autorización irregular para la ampliación del nivel de educación media
+   2.6. Irregularidades en la ejecución de Programa de Integración Escolar por parte de los establecimientos educacionales
+   2.7. Irregularidad en la ejecución del Programa Informática Educativa en los establecimientos educacionales
+   2.8. Irregularidades en la ejecución recursos de ley SEP
+   2.9. Irregularidad en el reconocimiento oficial de un establecimiento
+   2.10. Otras irregularidades en materia de educación
+
+3. INCUMPLIMIENTO DE PROCEDIMIENTOS ADMINISTRATIVOS
+   3.1. Incumplimiento de plazos de tramitación de procedimientos administrativos
+   3.2. Dictación de acto administrativo con incumplimiento de requisitos normativos
+   3.3. Falta de control interno
+   3.4. Incumplimiento de instrucciones de Contraloría General de la República
+   3.5. Inobservancia de principios reguladores
+   3.6. Faltas al principio de abstención (art. 12 - Ley N°19.880, de 2003)
+   3.7. Irregularidades en la tramitación del procedimiento administrativo
+   3.8. Vulneración del secreto del procedimiento
+   3.9. Dilación en la tramitación de un proceso disciplinario
+   3.10. Extravío de expediente sumarial
+   3.11. Prescripción acción disciplinaria
+   3.12. Actos y gestiones administrativas irregulares
+   3.13. Otras irregularidades en procedimientos administrativos
+
+4. INCUMPLIMIENTO PROCEDIMIENTOS DE COMPRAS
+   4.1. Irregularidad en las bases de licitación
+   4.2. Irregularidades en el financiamiento de compras públicas
+   4.3. Fragmentación de compras
+   4.4. Direccionamiento de compras
+   4.5. Omisión en la emisión de actos administrativos que autorizan compras
+   4.6. Incumplimiento de requisitos para proceder por determinado mecanismo de contratación
+   4.7. Irregularidad en publicación de licitación
+   4.8. Irregularidad en evaluación o adjudicación de bien o servicio
+   4.9. Irregularidades en las boletas de garantías
+   4.10. Irregularidades en celebración de contrato
+   4.11. Irregularidades en la recepción de los elementos objeto de la contratación
+   4.12. Incumplimiento plazos en la entrega del bien o servicio
+   4.13. Irregularidad en el pago del servicio o bien
+   4.14. Incumplimiento del contrato de adquisición de bienes o servicios
+   4.15. No aplicación de multas estipuladas en el procedimiento de compras
+   4.16. Irregularidades en prórrogas y modificaciones de contratos
+   4.17. Irregularidades en procedimientos de compras especiales
+   4.18. Irregularidades en grandes compras
+   4.19. Otras irregularidades en los procedimientos de contratación de compras públicas
+
+5. INFRACCIÓN AL DL 799, DE 1974
+   5.1. Mal uso de Vehículo Fiscal
+
+6. INFRACCIÓN ART 10 LEY 18.918
+   6.1. Infracción art 10 Ley 18.918
+
+7. INFRACCIÓN LEY DIP
+   7.1. Infracción Ley 20.880, de 2016 (DIP)
+
+8. INFRACCIÓN LEY KARIN
+   8.1. Acoso Laboral
+   8.2. Acoso Sexual
+   8.3. Violencia
+
+9. INFRACCIÓN LEY LOBBY
+   9.1. Infracción Ley N°20.730, de 2014 (Lobby)
+
+10. MATERIA DE PERSONAL
+   10.1. Irregularidades en la contratación de funcionarios y servidores públicos
+   10.2. Irregularidades en contrataciones y pago de servidores a honorarios
+   10.3. Irregularidad en el proceso de encasillamiento
+   10.4. Irregularidad en el proceso de promoción o ascenso
+   10.5. Irregularidad en el ejercicio de derechos funcionarios
+   10.6. Incumplimiento de jornada laboral
+   10.7. Remuneraciones
+   10.8. Irregularidad en el pago de cotizaciones previsionales
+   10.9. Horas extraordinarias
+   10.10. Ausencia reiterada del puesto de trabajo
+   10.11. Control Horario
+   10.12. Subsidio licencias médicas
+   10.13. Percepción irregular de beneficios
+   10.14. Personal a contrata y/o honorarios en labores de jefatura
+   10.15. Destinación a funciones que no son propias del cargo
+   10.16. Irregularidades en comisión de servicios, cometidos funcionarios y/o capacitaciones
+   10.17. Irregularidades en el procedimiento de desvinculación de funcionarios
+   10.18. Ejercicio ilegal de profesión
+   10.19. Incumplimiento de normativa interna propia del servicio
+   10.20. Falsificación de antecedentes para ingreso a servicios públicos
+   10.21. Incumplimiento de prohibiciones funcionarias
+   10.22. Incumplimiento de obligaciones y deberes funcionarios
+   10.23. Otras irregularidades en materias de personal
+   10.24. Omisión de la declaración de interés y patrimonio
+
+11. MUNICIPALES
+   11.1. Irregularidades en permisos circulación
+   11.2. Incumplimiento en la prestación de servicios municipales
+   11.3. Irregularidad en el otorgamiento de patentes municipales
+   11.4. Uso indebido de espacios públicos para exhibición de publicidad sin pago de derechos
+   11.5. Irregularidad en la modificación de plan regulador comunal
+   11.6. Uso irregular de recintos municipales
+   11.7. Infracción de ordenanza municipal
+   11.8. Extracción ilegal de áridos
+   11.9. Incumplimiento de normas e instrucciones en periodo de elección
+   11.10. Uso excesivo imagen del alcalde en redes sociales oficiales y otros
+   11.11. Incumplimiento de normas relativas a actuaciones previa autorización del concejo municipal
+   11.12. Otras irregularidades en materias municipales
+
+12. OBRAS MUNICIPALES
+   12.1. Irregularidades en otorgamiento certificado de informaciones previas
+   12.2. Irregularidades en otorgamiento de permisos
+   12.3. Irregularidades en la emisión del acta de observaciones efectuadas respecto de anteproyectos y permisos
+   12.4. Irregularidades en otorgamiento de patentes
+   12.5. Irregularidades en los pagos
+   12.6. Incumplimientos de las funciones del Inspector Técnico de Obra
+   12.7. Irregularidades en el otorgamiento de la recepción definitiva
+   12.8. Incumplimiento de plazos
+   12.9. Incumplimiento de prestaciones del contrato
+   12.10. Omisión de cobro de multas
+   12.11. Irregularidad en la celebración de contrato de obras
+   12.12. Obras no consideradas en los respectivos presupuestos municipales
+   12.13. Irregularidades en las boletas de garantías
+   12.14. Exigencias de actas no contempladas en la normativa de obras
+   12.15. Irregularidades en ejecución de proyecto
+   12.16. Aumentos y disminuciones de obras, y obras extraordinarias
+   12.17. Incumplimiento de normativas técnicas de obra y construcción
+   12.18. Otras irregularidades en procedimientos de obras municipales
+
+13. OBRAS PÚBLICAS
+   13.1. Incumplimientos de bases técnicas de la obra
+   13.2. Deficiencias constructivas
+   13.3. Incumplimiento del contrato de obra
+   13.4. Incumplimientos de las funciones del Inspector Técnico de Obra
+   13.5. Irregularidades en el cobro de multas y en la ejecución de garantías
+   13.6. Aumentos de plazos injustificados en la ejecución de obras
+   13.7. Incumplimiento de pago de obras y servicios del contrato
+   13.8. Modificación sin fundamento al contrato de obra
+   13.9. Falta de Coordinación entre Entidades en la ejecución de los proyectos de obras
+   13.10. Otras irregularidades en procedimientos de obras públicas
+
+14. PROBIDAD ADMINISTRATIVA
+   14.1. Uso del cargo para beneficios personales o políticos
+   14.2. Uso de jornada laboral para fines personales
+   14.3. Conflicto de interés
+   14.4. Mal uso de beneficio de Vivienda Fiscal
+   14.5. Filtración de información confidencial de la Entidad
+   14.6. Conducta no acorde al cargo
+   14.7. Contravenir los deberes de eficiencia, eficacia y legalidad que rigen el desempeño de los cargos públicos
+   14.8. Vulneración al principio de probidad administrativa, establecida en artículo 54 de la ley 18.575
+   14.9. Elusión de la propuesta pública
+   14.10. Maltrato y/o discriminación
+   14.11. Otras faltas a la probidad administrativa
+
+15. SALUD
+   15.1. Irregularidad u omisión en procedimiento de atención médica
+   15.2. Ejercicio ilegal de profesión de área de salud
+   15.3. Ausencia de autorizaciones sanitarias en espacios hospitalarios, basurales y/o vertederos
+   15.4. Incumplimiento al reglamento del programa de capacitación funcionarios de la atención primaria de salud
+   15.5. Gestión irregular del GES y de las listas de esperas no asociadas a aquéllas
+   15.6. Falta de control del proceso de especialización y subespecialización médica
+   15.7. Otras irregularidades en materias de salud
+
+16. VULNERACIÓN O INCUMPLIMIENTO A LEYES ESPECIALES
+   16.1. Vulneración a la ley N° 19.628, sobre protección a la vida privada
+   16.2. Infracción a normas de protección patrimonial (construcciones patrimoniales)
+   16.3. Vulneración o incumplimiento de otras leyes especiales
+
+CLASIFICACIÓN INTERNA (CAMPO DISTINTO DE MATERIA Y SUBMATERIA)
+VALS — criticidad alta.
+CIC — criticidad alta.
+Otra — criticidad evaluable.
+También se admite clasificación en blanco.
+La criticidad disponible es: Por evaluar, Baja, Media, Alta y Crítica.

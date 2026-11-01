@@ -208,6 +208,8 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
     <div class="panel etapas"><h3>Etapas del sumario</h3><p>Toca una etapa para ver los criterios que se aplican en ese momento del procedimiento.</p><div class="etapas-lista" id="etapas" role="group" aria-label="Filtrar por etapa"></div></div>
     <div class="filtros panel">
       <div class="f-buscar"><label for="q">Buscar</label><input id="q" type="search" placeholder="Número, artículo o palabra" autocomplete="off"></div>
+      <div><label for="f-cat">Categoría (Gestor)</label><select id="f-cat"><option value="">Todas</option></select></div>
+      <div><label for="f-sub">Subcategoría</label><select id="f-sub" disabled><option value="">Elige una categoría</option></select></div>
       <div><label for="f-materia">Materia</label><select id="f-materia"><option value="">Todas</option></select></div>
       <div><label for="f-tipo">Tipo</label><select id="f-tipo"><option value="">Todos</option></select></div>
       <div><label for="f-prio">Prioridad</label><select id="f-prio"><option value="">Todas</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select></div>
@@ -330,18 +332,18 @@ function aviso(msg){ $("#aviso").innerHTML = msg ? '<div class="aviso">' + esc(m
 function cargar(){
   $("#estado").textContent = "Cargando…";
   var p = mcp
-    ? Promise.all([sql("select * from public.dictamenes"), sql("select * from public.boletines order by fecha desc"), sql("select * from public.notas_seguimiento")])
-        .then(function(r){ rows = r[0]; bols = r[1]; notas = {}; r[2].forEach(function(x){ notas[x.dictamen_id] = x; }); })
-    : Promise.all([api("/dictamenes?select=*"), api("/boletines?select=*&order=fecha.desc")])
-        .then(function(r){ rows = r[0]; bols = r[1]; });
+    ? Promise.all([sql("select * from public.dictamenes"), sql("select * from public.boletines order by fecha desc"), sql("select * from public.notas_seguimiento"), sql("select * from public.catalogo_materias order by cat_num, sub_num").catch(function(){ return []; })])
+        .then(function(r){ rows = r[0]; bols = r[1]; notas = {}; r[2].forEach(function(x){ notas[x.dictamen_id] = x; }); setCatalogo(r[3]); })
+    : Promise.all([api("/dictamenes?select=*"), api("/boletines?select=*&order=fecha.desc"), api("/catalogo_materias?select=*&order=cat_num,sub_num").catch(function(){ return []; })])
+        .then(function(r){ rows = r[0]; bols = r[1]; setCatalogo(r[2]); });
   return p.then(function(){
-    store("cgr-copia", {rows: rows, bols: bols, t: Date.now()});
+    store("cgr-copia", {rows: rows, bols: bols, cat: catalogo, t: Date.now()});
     aviso("");
     $("#estado").textContent = rows.length + " documentos. Datos al " + new Date().toLocaleString("es-CL", {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"});
   }).catch(function(e){
     var c = load("cgr-copia");
     aviso((mcp ? errMcp(e) : "No se pudo conectar con la base de datos. Revisa tu conexión y pulsa «Actualizar».") + (c ? " Mientras tanto ves la última copia guardada en este navegador." : ""));
-    if (c && !rows.length) { rows = c.rows; bols = c.bols; }
+    if (c && !rows.length) { rows = c.rows; bols = c.bols; setCatalogo(c.cat || []); }
     $("#estado").textContent = c ? "Copia guardada del " + new Date(c.t).toLocaleString("es-CL") : "Sin datos";
   }).then(function(){
     $("#campo-seg").hidden = !mcp;
@@ -377,8 +379,35 @@ function pintarEtapas(){
     + ETAPAS.map(function(e, i){ var c = cnt[e] || 0; return '<button type="button" data-etapa="' + esc(e) + '" aria-pressed="' + (etapaSel === e) + '"' + (c ? "" : " disabled") + '>' + (e === "Transversal" ? "" : '<span class="n">' + (i + 1) + '</span>') + esc(e === "Transversal" ? "Transversal (plazos, prescripción, reserva)" : e) + '<span class="c">' + c + '</span></button>'; }).join("");
   caja.scrollLeft = sx;
 }
+var catalogo = [], subPorCod = {}, catNombre = {};
+function setCatalogo(list){
+  catalogo = list || []; subPorCod = {}; catNombre = {};
+  catalogo.forEach(function(c){ subPorCod[c.codigo] = c; catNombre[c.cat_num] = c.categoria; });
+}
+function catDe(cod){ return String(cod).split(".")[0]; }
+function nombreSub(cod){ var c = subPorCod[cod]; return c ? cod + " " + c.subcategoria : cod; }
+function capCat(t){
+  if (!t) return "";
+  var x = t.charAt(0) + t.slice(1).toLowerCase();
+  return x.replace(/\bkarin\b/g, "Karin").replace(/\bdip\b/g, "DIP").replace(/\blobby\b/g, "Lobby").replace(/\bdl\b/g, "DL").replace(/\bart\b/g, "art.");
+}
+function opcionesSub(){
+  var fc = $("#f-cat"), fs = $("#f-sub"), k = fc.value, cs = fs.value;
+  if (!k) { fs.innerHTML = '<option value="">Elige una categoría</option>'; fs.disabled = true; return; }
+  var n = {}; rows.forEach(function(r){ (r.subcategorias || []).forEach(function(c){ n[c] = (n[c] || 0) + 1; }); });
+  fs.disabled = false;
+  fs.innerHTML = '<option value="">Todas</option>' + catalogo.filter(function(c){ return String(c.cat_num) === k; }).map(function(c){
+    return '<option value="' + esc(c.codigo) + '"' + (c.codigo === cs ? " selected" : "") + '>' + esc(c.codigo + " " + c.subcategoria) + ' (' + (n[c.codigo] || 0) + ')</option>';
+  }).join("");
+}
 function opciones(){
   pintarEtapas();
+  var fc = $("#f-cat"), kc = fc.value, nc = {};
+  rows.forEach(function(r){ var vistos = {}; (r.subcategorias || []).forEach(function(c){ var k = catDe(c); if (!vistos[k]) { vistos[k] = 1; nc[k] = (nc[k] || 0) + 1; } }); });
+  fc.innerHTML = '<option value="">Todas</option>' + Object.keys(catNombre).sort(function(a, b){ return a - b; }).map(function(k){
+    return '<option value="' + k + '"' + (k === kc ? " selected" : "") + '>' + k + '. ' + esc(capCat(catNombre[k])) + ' (' + (nc[k] || 0) + ')</option>';
+  }).join("");
+  opcionesSub();
   var st = $("#f-tipo"), sm = $("#f-materia"), ct = st.value, cm = sm.value, tipos = {}, mats = {};
   rows.forEach(function(r){ tipos[r.tipo] = 1; (r.materias || []).forEach(function(m){ mats[m] = (mats[m] || 0) + 1; }); });
   st.innerHTML = '<option value="">Todos</option>' + Object.keys(tipos).sort().map(function(t){ return '<option' + (t === ct ? " selected" : "") + '>' + esc(t) + '</option>'; }).join("");
@@ -386,7 +415,7 @@ function opciones(){
 }
 
 function visibles(){
-  var q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, o = $("#f-origen").value, s = mcp ? $("#f-seg").value : "";
+  var q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, o = $("#f-origen").value, kc = $("#f-cat").value, ks = $("#f-sub").value, s = mcp ? $("#f-seg").value : "";
   var ed = null;
   if (edicionSel) { var b = bols.filter(function(x){ return x.fecha === edicionSel; })[0]; ed = b ? (b.dictamen_ids || []) : []; }
   var v = rows.filter(function(r){
@@ -395,11 +424,13 @@ function visibles(){
     if (m && (r.materias || []).indexOf(m) < 0) return false;
     if (etapaSel && (r.etapas || []).indexOf(etapaSel) < 0) return false;
     if (p && r.prioridad !== p) return false;
+    if (ks && (r.subcategorias || []).indexOf(ks) < 0) return false;
+    if (kc && !(r.subcategorias || []).some(function(c){ return catDe(c) === kc; })) return false;
     if (o === "base" && !r.linea_base) return false;
     if (o === "nuevo" && r.linea_base) return false;
     if (s && ((notas[r.id] && notas[r.id].estado) || "pendiente") !== s) return false;
     if (q) {
-      var h = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, r.organo, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" ")].join(" ").toLowerCase();
+      var h = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, r.organo, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" "), (r.subcategorias || []).map(nombreSub).join(" ")].join(" ").toLowerCase();
       if (!q.split(/\s+/).every(function(w){ return h.indexOf(w) >= 0; })) return false;
     }
     return true;
@@ -422,6 +453,7 @@ function lista(){
       + '<p class="num"><strong>' + esc(r.numero || "Sin número") + '</strong>' + (f ? " · " + esc(f) : "") + '</p>'
       + '<p class="res">' + esc(r.resumen) + '</p>'
       + ((r.etapas || []).length ? '<div class="etapa-linea">Etapa: ' + esc(r.etapas.join(", ")) + '</div>' : "")
+      + ((r.subcategorias || []).length ? '<div class="etapa-linea">Categoría: ' + esc(r.subcategorias.map(nombreSub).join(" · ")) + '</div>' : "")
       + (r.efecto_jurisprudencial ? '<div class="efecto' + (fuertes.indexOf(r.efecto_jurisprudencial) >= 0 ? " fuerte" : "") + '">' + esc(r.efecto_jurisprudencial) + '</div>' : "")
       + '</article>';
   }).join("") : '<div class="panel vacio">' + (rows.length ? 'Ningún documento cumple los filtros elegidos.<br><br><button class="boton-sec" type="button" data-limpiar>Quitar filtros</button>' : "Todavía no hay documentos cargados.") + '</div>';
@@ -447,7 +479,7 @@ function abrir(id){
     + '<div class="ficha-cuerpo">'
     + '<div class="panel bloque"><div class="doc-top"><span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (r.efecto_jurisprudencial ? '<span class="etiqueta">' + esc(r.efecto_jurisprudencial) + '</span>' : "") + '</div>'
     + '<h2 id="ficha-titulo">' + esc(r.titulo) + '</h2>'
-    + '<table class="datos">' + fila("Número o rol", r.numero || "Sin número") + fila("Etapa del sumario", (r.etapas || []).join(", ")) + fila("Origen", r.linea_base ? "Línea base normativa y jurisprudencial" : "Novedad (boletín)") + fila("Órgano", r.organo) + fila("Fecha del documento", fecha(r.fecha_documento, true)) + fila("Publicación", fecha(r.fecha_publicacion, true)) + fila("Ingreso al repositorio", fecha(r.fecha_ingreso, true)) + '</table>'
+    + '<table class="datos">' + fila("Número o rol", r.numero || "Sin número") + fila("Etapa del sumario", (r.etapas || []).join(", ")) + fila("Categoría y subcategoría (Gestor Jurídico)", (r.subcategorias || []).map(function(c){ return capCat(catNombre[catDe(c)] || "") + " › " + nombreSub(c); }).join("; ")) + fila("Origen", r.linea_base ? "Línea base normativa y jurisprudencial" : "Novedad (boletín)") + fila("Órgano", r.organo) + fila("Fecha del documento", fecha(r.fecha_documento, true)) + fila("Publicación", fecha(r.fecha_publicacion, true)) + fila("Ingreso al repositorio", fecha(r.fecha_ingreso, true)) + '</table>'
     + (r.numero_verificado ? "" : '<p class="texto-gris">El número o la fecha exacta aún no se confirma en el documento oficial.</p>')
     + '</div>'
     + '<div class="panel bloque"><h3>Resumen</h3><p>' + esc(r.resumen) + '</p></div>'
@@ -490,6 +522,7 @@ function resumenFicha(r, completo){
   var t = "[" + (r.numero || "sin número") + "] " + r.tipo + ". " + r.titulo + ". Fecha: " + (ordenFecha(r) || "s/f") + ". Efecto: " + (r.efecto_jurisprudencial || "-") + ".";
   if (r.linea_base) t += " Línea base (criterio vigente de referencia).";
   if ((r.etapas || []).length) t += " Etapa: " + r.etapas.join(", ") + ".";
+  if ((r.subcategorias || []).length) t += " Categoría Gestor Jurídico: " + r.subcategorias.map(nombreSub).join("; ") + ".";
   t += "\nCriterio: " + (r.criterio || r.resumen || "");
   if (completo) t += "\nResumen: " + (r.resumen || "") + "\nConsecuencias prácticas: " + (r.consecuencias_practicas || "") + "\nArtículos: " + (r.articulos || []).join(", ") + "\nRelacionados: " + (r.dictamenes_relacionados || []).join(", ");
   return t;
@@ -569,17 +602,18 @@ document.addEventListener("click", function(e){
   if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
   if (t.hasAttribute("data-ir")) { var v = t.getAttribute("data-ir"); location.hash = v; return vista(v); }
   if (t.hasAttribute("data-quitar")) { edicionSel = null; return lista(); }
-  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg"].forEach(function(s){ $(s).value = ""; }); lista(); }
+  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-cat"].forEach(function(s){ $(s).value = ""; }); opcionesSub(); lista(); }
 });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("#ficha").hidden) cerrar();
   if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("doc")) { e.preventDefault(); abrir(e.target.getAttribute("data-id")); }
 });
-["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden"].forEach(function(s){ $(s).addEventListener("input", lista); $(s).addEventListener("change", lista); });
+$("#f-cat").addEventListener("change", function(){ $("#f-sub").value = ""; opcionesSub(); });
+["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden","#f-cat","#f-sub"].forEach(function(s){ $(s).addEventListener("input", lista); $(s).addEventListener("change", lista); });
 $("#velo").onclick = cerrar;
 $("#recargar").onclick = cargar;
 $("#copiar").onclick = function(){
-  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","linea_base","etapas","materias","resumen","consecuencias_practicas","url_original","url_fuente"];
+  var cols = ["tipo","numero","titulo","organo","fecha_documento","fecha_publicacion","prioridad","efecto_jurisprudencial","linea_base","etapas","subcategorias","materias","resumen","consecuencias_practicas","url_original","url_fuente"];
   var q = function(v){ return '"' + String(Array.isArray(v) ? v.join("; ") : (v == null ? "" : v)).replace(/"/g, '""') + '"'; };
   var txt = [cols.join(",")].concat(visibles().map(function(r){ return cols.map(function(c){ return q(r[c]); }).join(","); })).join("\n");
   var b = $("#copiar");
