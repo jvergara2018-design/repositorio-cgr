@@ -31,6 +31,11 @@ Lista de mejoras acordadas para más adelante. Al implementar una, muévela a "H
    - Hoy cada visita descarga el repositorio completo. Pasar a descargar solo las columnas del listado (id, tipo, número, título, fecha, prioridad y un resumen corto) con paginación, y traer el detalle completo al abrir una ficha.
    - Motivo: el plan gratis de Supabase incluye 5 GB de transferencia al mes; con 1.000 fichas, cada visita bajaría unos 2 MB.
 
+10. **OneDrive (1 TB) como archivo documental y segunda copia de respaldo** (anotado el 01-11-2026)
+   - Usos: guardar los PDF originales de dictámenes y fallos (por si cambian los enlaces de la CGR o de la prensa) y una segunda copia del respaldo semanal.
+   - No reemplaza a Supabase: el sitio no puede consultar OneDrive como base de datos.
+   - Opción automática: agregar al workflow de respaldo una copia a OneDrive con rclone (requiere autorizar rclone con la cuenta Microsoft y guardar el token como secreto de GitHub). El conector Microsoft 365 de Claude es para cuentas de trabajo y solo permite buscar y leer, no subir archivos.
+
 ## Límites del plan gratis de Supabase (revisados el 01-11-2026)
 - Base de datos: 500 MB por proyecto. Uso actual: 11 MB (casi todo es la estructura interna de Postgres); cada ficha ocupa unos 2 KB y cada boletín unos 2 KB. Alcanza para más de 100.000 fichas.
 - Transferencia: 5 GB al mes. Es el límite que se alcanzaría primero si el sitio tiene muchas visitas con un repositorio grande (ver mejora 8).
