@@ -17,6 +17,7 @@ Registro de decisiones para las revisiones semanales del diseño. Cada revisión
 - Un solo `index.html` para dos versiones: pública (GitHub Pages, lee Supabase por REST) y privada (claude.ai, lee por el conector `mcp` y usa `sample` para el abogado beta).
 - Pestañas: Repositorio, Boletines, Plazos y Abogado (beta, solo en claude.ai).
 - "Mi seguimiento" solo en claude.ai.
+- Panel "Etapas del sumario" (filtro por etapa procesal, columna `etapas` en Supabase), agregado el 01-11-2026 a pedido del usuario.
 
 ## Historial de propuestas semanales
 (La revisión semanal agrega aquí una línea por semana: fecha, cambios propuestos y si se publicaron o se descartaron.)
