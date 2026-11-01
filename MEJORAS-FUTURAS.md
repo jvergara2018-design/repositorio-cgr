@@ -27,5 +27,19 @@ Lista de mejoras acordadas para más adelante. Al implementar una, muévela a "H
    - Edge Function de Supabase que llama a la API de Claude con las reglas y el contexto del repositorio, para que la consulta funcione en cualquier navegador.
    - Requiere una API key de Anthropic (costo por consulta a cargo del usuario), límite de consultas por persona y, idealmente, la mejora 5 para restringir el acceso.
 
+8. **Carga liviana del listado** (anotado el 01-11-2026; hacerla al llegar a unos 300 documentos)
+   - Hoy cada visita descarga el repositorio completo. Pasar a descargar solo las columnas del listado (id, tipo, número, título, fecha, prioridad y un resumen corto) con paginación, y traer el detalle completo al abrir una ficha.
+   - Motivo: el plan gratis de Supabase incluye 5 GB de transferencia al mes; con 1.000 fichas, cada visita bajaría unos 2 MB.
+9. **Respaldo automático de la base de datos** (anotado el 01-11-2026)
+   - El plan gratis de Supabase no incluye respaldos automáticos. Agregar a la tarea de lunes, miércoles y viernes (o a una semanal) la exportación de `dictamenes` y `boletines` a JSON en el repositorio de GitHub (carpeta `respaldo/`).
+   - Excluir `notas_seguimiento` del repositorio público, o guardarla en un repositorio privado.
+
+## Límites del plan gratis de Supabase (revisados el 01-11-2026)
+- Base de datos: 500 MB por proyecto. Uso actual: 11 MB (casi todo es la estructura interna de Postgres); cada ficha ocupa unos 2 KB y cada boletín unos 2 KB. Alcanza para más de 100.000 fichas.
+- Transferencia: 5 GB al mes. Es el límite que se alcanzaría primero si el sitio tiene muchas visitas con un repositorio grande (ver mejora 8).
+- Pausa por inactividad: el proyecto se pausa tras una semana con muy poca actividad. Las tareas de lunes, miércoles y viernes lo mantienen activo; Supabase avisa por correo antes de pausar, y un proyecto pausado conserva sus datos.
+- Sin respaldos automáticos (ver mejora 9).
+- Si se supera algo: plan Pro, 25 USD al mes (8 GB de base, 250 GB de transferencia, respaldos diarios, sin pausas).
+
 ## Hechas
 (ninguna todavía)
