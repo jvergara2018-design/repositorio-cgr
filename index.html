@@ -499,7 +499,7 @@ function abrir(id){
     + (sampleFn ? '<div class="panel bloque"><h3>Consultar al abogado<span class="beta">beta</span></h3><p class="texto-gris">Pregunta cómo aplica este documento a un caso tuyo.</p><br><button class="boton" type="button" data-consultar="' + esc(r.id) + '">Consultar sobre este documento</button></div>' : "")
     + '<div class="panel bloque enlaces"><h3>Documento original y fuente</h3>'
       + '<p class="enlace-estado ' + esc(r.enlace_estado || "") + '">' + esc(ESTADO_ENLACE[r.enlace_estado] || "") + '</p>'
-      + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">' + (r.enlace_estado === "oficial_busqueda" ? "Abrir el sitio oficial" : "Abrir el documento oficial") + '</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
+      + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">' + (/pjud\.cl/.test(uo) ? "Abrir la consulta de causas del Poder Judicial" : r.enlace_estado === "oficial_busqueda" ? "Abrir el sitio oficial" : "Abrir el documento oficial") + '</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
       + (r.como_ubicar ? '<p class="como-ubicar"><strong>Cómo ubicarlo:</strong> ' + esc(r.como_ubicar) + '</p>' : "")
       + (uf ? '<a href="' + esc(uf) + '" target="_blank" rel="noopener">Ver la fuente complementaria (' + esc(r.fuente_nombre || "enlace") + ')</a>' : "") + '</div>'
     + (mcp ? '<div class="panel bloque"><h3>Mi seguimiento</h3><div class="nota">'
