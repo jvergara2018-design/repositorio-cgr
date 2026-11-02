@@ -206,7 +206,6 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   <div class="barra-estado"><span id="estado">Cargando…</span><button class="boton-sec" id="recargar" type="button">Actualizar</button><button class="boton-sec" id="copiar" type="button">Copiar tabla (CSV)</button></div>
 
   <section id="v-repositorio">
-    <div id="boletin"></div>
     <div class="titulo-seccion"><h2>Documentos</h2><span id="cuenta"></span></div>
     <div class="panel etapas"><h3>Etapas del sumario</h3><p>Toca una etapa para ver los criterios que se aplican en ese momento del procedimiento.</p><div class="etapas-lista" id="etapas" role="group" aria-label="Filtrar por etapa"></div></div>
     <div class="filtros panel">
@@ -224,7 +223,7 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
     <div class="lista" id="lista"></div>
   </section>
 
-  <section id="v-boletines" hidden><div id="ediciones"></div></section>
+  <section id="v-boletines" hidden><div id="boletin"></div><div id="ediciones"></div></section>
 
   <section id="v-abogado" hidden>
     <div class="panel abogado-intro">
@@ -371,7 +370,7 @@ function boletin(){
         + (al.length ? '<div><h3>Qué revisar en tus sumarios</h3><ul>' + al.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : "")
       + '</div>' : "")
     + '<div class="acciones">' + (n ? '<button class="boton" type="button" data-edicion="' + esc(b.fecha) + '">Ver los ' + n + ' documentos de este boletín</button>' : "")
-    + '<button class="boton-sec" type="button" data-ir="boletines">Boletines anteriores</button></div>'
+    + '</div>'
     + '</article>';
 }
 
@@ -463,13 +462,14 @@ function lista(){
 }
 
 function ediciones(){
-  $("#ediciones").innerHTML = bols.length ? bols.map(function(b){
+  var ant = bols.slice(1);
+  $("#ediciones").innerHTML = !bols.length ? '<div class="panel vacio">Aún no hay boletines publicados.</div>' : !ant.length ? "" : '<div class="titulo-seccion"><h2>Boletines anteriores</h2></div>' + ant.map(function(b){
     return '<article class="panel edicion"><p class="meta">' + esc(fecha(b.fecha, true)) + '</p><h3>' + esc(b.titulo) + '</h3><p>' + esc(b.resumen) + '</p>'
       + (b.destacados ? '<h4>Lo más importante</h4><p>' + esc(b.destacados) + '</p>' : "")
       + (b.alertas ? '<h4>Qué revisar en tus sumarios</h4><p>' + esc(b.alertas) + '</p>' : "")
       + ((b.dictamen_ids || []).length ? '<h4>Documentos de este boletín</h4><div class="docs">' + b.dictamen_ids.map(function(id){ var r = rows.filter(function(x){ return x.id === id; })[0]; return r ? '<button type="button" data-id="' + esc(id) + '">' + esc(r.numero || r.titulo) + '</button>' : ""; }).join("") + '</div>' : "")
       + '</article>';
-  }).join("") : '<div class="panel vacio">Aún no hay boletines publicados.</div>';
+  }).join("");
 }
 
 var ESTADO_ENLACE = {
@@ -611,7 +611,7 @@ document.addEventListener("click", function(e){
   if (t.hasAttribute("data-consultar")) { cerrar(); $("#ctx").value = t.getAttribute("data-consultar"); nuevaConsulta(); location.hash = "abogado"; vista("abogado"); return $("#pregunta").focus(); }
   if (t.hasAttribute("data-sugerencia")) { $("#pregunta").value = t.getAttribute("data-sugerencia"); return preguntar(); }
   if (t.hasAttribute("data-id")) return abrir(t.getAttribute("data-id"));
-  if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
+  if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); location.hash = "repositorio"; vista("repositorio"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
   if (t.hasAttribute("data-ir")) { var v = t.getAttribute("data-ir"); location.hash = v; return vista(v); }
   if (t.hasAttribute("data-quitar")) { edicionSel = null; return lista(); }
   if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-cat"].forEach(function(s){ $(s).value = ""; }); opcionesSub(); lista(); }
