@@ -21,3 +21,4 @@ Registro de decisiones para las revisiones semanales del diseño. Cada revisión
 
 ## Historial de propuestas semanales
 (La revisión semanal agrega aquí una línea por semana: fecha, cambios propuestos y si se publicaron o se descartaron.)
+- 2026-11-03: propuesta con filtros plegables en el teléfono («Más filtros» con contador), campos de 16 px y botones de 44 px, mensaje de error con «Reintentar» y etiquetas más legibles en el teléfono, pendiente de aprobación.
