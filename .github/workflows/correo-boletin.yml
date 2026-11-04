@@ -1,0 +1,152 @@
+name: Boletín por correo (Gmail)
+
+# Envía el boletín más reciente por correo a la lista de destinatarios, sin costo,
+# usando una cuenta de Gmail con "contraseña de aplicación".
+#
+# Secretos necesarios (Settings → Secrets and variables → Actions):
+#   GMAIL_USER          cuenta que envía, p. ej. juampivergaraj@gmail.com
+#   GMAIL_APP_PASSWORD  contraseña de aplicación de 16 letras (no la clave normal)
+#   BOLETIN_CORREOS     destinatarios separados por coma o salto de línea
+# Si falta alguno, el flujo termina sin enviar ni fallar.
+# La fecha del último boletín enviado queda en avisos/ultimo-correo.txt.
+
+on:
+  schedule:
+    - cron: "10 12 * * 1,3,5"
+    - cron: "40 13 * * 1,3,5"
+    - cron: "10 17 * * 1,3,5"
+    - cron: "10 22 * * *"
+  workflow_dispatch:
+    inputs:
+      reenviar:
+        description: "Reenviar el último boletín aunque ya se haya enviado (sirve de prueba)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: correo-boletin
+  cancel-in-progress: false
+
+jobs:
+  correo:
+    runs-on: ubuntu-latest
+    env:
+      SB_URL: https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1
+      SB_KEY: sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe
+      SITIO: https://jvergara2018-design.github.io/repositorio-cgr/
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      BOLETIN_CORREOS: ${{ secrets.BOLETIN_CORREOS }}
+      REENVIAR: ${{ inputs.reenviar }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enviar boletín por correo
+        run: |
+          python3 - <<'PY'
+          import html, json, os, re, smtplib, ssl, urllib.parse, urllib.request
+          from email.message import EmailMessage
+          from email.utils import formataddr
+
+          user = os.environ.get("GMAIL_USER", "").strip()
+          clave = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
+          dest = [c.strip() for c in re.split(r"[,;\n]", os.environ.get("BOLETIN_CORREOS", "")) if "@" in c]
+          if not (user and clave and dest):
+              print("Faltan secretos GMAIL_USER, GMAIL_APP_PASSWORD o BOLETIN_CORREOS: no se envía nada.")
+              raise SystemExit(0)
+
+          def get(path):
+              req = urllib.request.Request(os.environ["SB_URL"] + path, headers={"apikey": os.environ["SB_KEY"], "Accept": "application/json"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return json.load(r)
+
+          bols = get("/boletines?select=fecha,titulo,resumen,destacados,alertas,dictamen_ids&order=fecha.desc&limit=1")
+          if not bols:
+              print("No hay boletines."); raise SystemExit(0)
+          b = bols[0]
+          archivo = "avisos/ultimo-correo.txt"
+          ultimo = open(archivo).read().strip() if os.path.exists(archivo) else ""
+          if ultimo >= b["fecha"] and os.environ.get("REENVIAR") != "true":
+              print(f"Sin boletín nuevo (último enviado: {ultimo})."); raise SystemExit(0)
+
+          ids = b.get("dictamen_ids") or []
+          docs = []
+          if ids:
+              filtro = urllib.parse.quote("(" + ",".join('"%s"' % i for i in ids) + ")")
+              docs = get(f"/dictamenes?select=id,numero,titulo,tipo,url_original,etapas&id=in.{filtro}")
+              orden = {i: n for n, i in enumerate(ids)}
+              docs.sort(key=lambda d: orden.get(d["id"], 999))
+
+          def lineas(t):
+              return [re.sub(r"^\s*(?:[•\-]|\d+[\).])\s*", "", x).strip() for x in (t or "").splitlines() if x.strip()]
+
+          meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+          a, m, d = b["fecha"].split("-")
+          fecha = f"{int(d)} de {meses[int(m)-1]} de {a}"
+          destacados, alertas = lineas(b.get("destacados")), lineas(b.get("alertas"))
+          e = html.escape
+          sitio = os.environ["SITIO"]
+
+          def ul(items):
+              return "<ul style='margin:6px 0 14px;padding-left:20px'>" + "".join(f"<li style='margin:4px 0'>{e(x)}</li>" for x in items) + "</ul>"
+
+          filas = "".join(
+              f"<li style='margin:6px 0'><a href='{e(x.get('url_original') or sitio)}' style='color:#1F5AA6;font-weight:600'>{e(x.get('numero') or x['id'])}</a>"
+              f" · {e(x.get('titulo') or '')}<br><span style='color:#5b6575;font-size:13px'>{e(x.get('tipo') or '')}"
+              + (f" · Etapa: {e(', '.join(x.get('etapas') or []))}" if x.get('etapas') else "") + "</span></li>"
+              for x in docs)
+
+          cuerpo_html = f"""<!doctype html><html><body style="margin:0;background:#F4F6F9;font-family:Arial,Helvetica,sans-serif;color:#1d2433">
+          <div style="max-width:640px;margin:0 auto;background:#fff">
+            <div style="background:#132A4F;color:#fff;padding:18px 22px">
+              <div style="font-size:13px;opacity:.85">Boletín de jurisprudencia CGR · Sumarios</div>
+              <div style="font-size:20px;font-weight:700;margin-top:4px">{e(b['titulo'])}</div>
+              <div style="font-size:13px;opacity:.85;margin-top:4px">{e(fecha)}</div>
+            </div>
+            <div style="padding:18px 22px;font-size:15px;line-height:1.5">
+              <p style="margin:0 0 14px">{e(b.get('resumen') or '')}</p>
+              {"<h3 style='font-size:15px;color:#132A4F;margin:14px 0 4px'>Lo más importante</h3>" + ul(destacados) if destacados else ""}
+              {"<h3 style='font-size:15px;color:#132A4F;margin:14px 0 4px'>Qué revisar en tus sumarios</h3>" + ul(alertas) if alertas else ""}
+              {"<h3 style='font-size:15px;color:#132A4F;margin:14px 0 4px'>Documentos de esta edición</h3><ul style='padding-left:20px;margin:6px 0 14px'>" + filas + "</ul>" if filas else ""}
+              <p style="margin:18px 0"><a href="{sitio}#boletines" style="background:#1F5AA6;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:600">Abrir el repositorio</a></p>
+              <p style="font-size:12px;color:#5b6575;margin-top:22px">Información de orientación para el seguimiento de sumarios. Antes de aplicarla en un caso concreto, revisa el documento original. Para dejar de recibir este boletín, responde a este correo.</p>
+            </div>
+          </div></body></html>"""
+
+          texto = [b["titulo"], fecha, "", b.get("resumen") or ""]
+          if destacados: texto += ["", "Lo más importante:"] + ["• " + x for x in destacados]
+          if alertas: texto += ["", "Qué revisar en tus sumarios:"] + ["• " + x for x in alertas]
+          if docs: texto += ["", "Documentos de esta edición:"] + [f"• {x.get('numero') or x['id']} — {x.get('titulo') or ''}" for x in docs]
+          texto += ["", "Repositorio: " + sitio]
+
+          msg = EmailMessage()
+          msg["Subject"] = f"Boletín CGR sumarios · {fecha}: {b['titulo']}"
+          msg["From"] = formataddr(("Boletín Jurisprudencia CGR", user))
+          msg["To"] = user
+          msg["Reply-To"] = user
+          msg.set_content("\n".join(texto))
+          msg.add_alternative(cuerpo_html, subtype="html")
+
+          # Destinatarios en copia oculta: nadie ve los correos de los demás.
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context(), timeout=60) as s:
+              s.login(user, clave)
+              for i in range(0, len(dest), 80):
+                  s.send_message(msg, from_addr=user, to_addrs=[user] + dest[i:i+80])
+          print(f"Boletín del {b['fecha']} enviado a {len(dest)} destinatario(s).")
+          os.makedirs("avisos", exist_ok=True)
+          open(archivo, "w").write(b["fecha"] + "\n")
+          PY
+
+      - name: Registrar el último boletín enviado
+        run: |
+          git config user.name "aviso-automatico"
+          git config user.email "aviso-automatico@users.noreply.github.com"
+          git add avisos/
+          if ! git diff --cached --quiet; then
+            git commit -m "Registra envío del boletín por correo"
+            git pull --rebase
+            git push
+          fi
