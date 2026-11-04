@@ -3,7 +3,7 @@
 Lista de mejoras acordadas para más adelante. Al implementar una, muévela a "Hechas" con la fecha.
 
 ## Pendientes
-1. **Envío automático del boletín por correo con Supabase + Resend** (anotado el 01-11-2026)
+1. ~~**Envío automático del boletín por correo con Supabase + Resend**~~ → **Hecho el 03-11-2026 sin costo** con GitHub Actions + Gmail (`.github/workflows/correo-boletin.yml`). Destinatarios en el secreto `BOLETIN_CORREOS`; requiere `GMAIL_USER` y `GMAIL_APP_PASSWORD`. Límite de Gmail: ~500 destinatarios al día. Resend queda como alternativa solo si se necesita un remitente con dominio propio.
    - Al guardarse un boletín nuevo en `public.boletines`, un trigger de base de datos o un webhook llama a una Edge Function de Supabase que envía el correo con Resend (gratis hasta 100 correos al día).
    - Ventajas: correo con formato propio, desde una dirección del usuario y con la posibilidad de enviarlo a varias personas (equipo).
    - Requiere: cuenta en Resend, dominio o remitente verificado y la API key guardada como secreto de la Edge Function.
@@ -22,7 +22,7 @@ Lista de mejoras acordadas para más adelante. Al implementar una, muévela a "H
    - Requiere políticas RLS por usuario en `notas_seguimiento` (agregar la columna user_id). El usuario solo debe confirmar su correo.
 6. **Suscripción al boletín** (anotado el 01-11-2026)
    - Formulario en el sitio para que el usuario o su equipo dejen su correo; tabla `suscriptores` con confirmación por correo (doble opt-in) y enlace para darse de baja.
-   - Depende de la mejora 1 (envío con Resend).
+   - Hoy los destinatarios se agregan a mano en el secreto `BOLETIN_CORREOS`; un formulario de suscripción requeriría guardar correos en una tabla privada.
 7. **Abogado (beta) en el sitio público** (anotado el 01-11-2026)
    - Edge Function de Supabase que llama a la API de Claude con las reglas y el contexto del repositorio, para que la consulta funcione en cualquier navegador.
    - Requiere una API key de Anthropic (costo por consulta a cargo del usuario), límite de consultas por persona y, idealmente, la mejora 5 para restringir el acceso.
