@@ -44,5 +44,5 @@ Lista de mejoras acordadas para más adelante. Al implementar una, muévela a "H
 - Si se supera algo: plan Pro, 25 USD al mes (8 GB de base, 250 GB de transferencia, respaldos diarios, sin pausas).
 
 ## Hechas
-- 01-11-2026: **Aviso al teléfono con ntfy.** GitHub Actions (`.github/workflows/aviso-boletin.yml`) revisa los boletines nuevos (lunes, miércoles y viernes después de la tarea, y una vez al día) y envía una notificación al canal de ntfy guardado en el secreto `NTFY_TOPIC` de GitHub. El nombre del canal no se escribe en el repositorio porque es público (corregido el 07-11-2026).
+- 01-11-2026: **Aviso al teléfono con ntfy.** Eliminado el 07-11-2026: el canal quedaba expuesto en el repositorio público. El aviso de boletines nuevos queda a cargo del correo (`correo-boletin.yml`).
 - 01-11-2026: **Respaldo automático de la base de datos.** GitHub Actions (`.github/workflows/respaldo.yml`) copia cada domingo `dictamenes` y `boletines` a `respaldo/` en JSON. Las notas personales no se respaldan aquí porque el repositorio es público.
