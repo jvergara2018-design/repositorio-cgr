@@ -28,7 +28,8 @@ jobs:
     env:
       SB_URL: https://jlgjaohzmnaxgarjaiog.supabase.co/rest/v1
       SB_KEY: sb_publishable_MiyrlWnB9JY8JNjmobtlMw_4j2LVpSe
-      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'cgr-sumarios-ua1sdxy4m5' }}
+      # El canal de ntfy va solo en el secreto NTFY_TOPIC: el repositorio es público.
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
       SITIO: https://jvergara2018-design.github.io/repositorio-cgr/
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +39,10 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re, urllib.request
+
+          if not os.environ.get("NTFY_TOPIC", "").strip():
+              print("::error::Falta el secreto NTFY_TOPIC (Settings → Secrets and variables → Actions).")
+              raise SystemExit(1)
 
           def get(path):
               req = urllib.request.Request(os.environ["SB_URL"] + path, headers={"apikey": os.environ["SB_KEY"], "Accept": "application/json"})
