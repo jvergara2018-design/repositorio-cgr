@@ -20,7 +20,8 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fondo);color:var(--texto);font:17px/1.55 var(--font)}
 a{color:var(--azul)}
 button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:3px solid #8DB3E8;outline-offset:2px}
+:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+.cabecera :focus-visible,.ficha-cab :focus-visible{outline-color:#8DB3E8}
 .contenedor{max-width:1040px;margin:0 auto;padding-left:20px;padding-right:20px}
 [hidden]{display:none!important}
 
@@ -65,7 +66,8 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .etiqueta.base{background:#E8F1EA;color:#25633A}
 .enlace-estado{font-size:.85rem;margin:0 0 8px;color:var(--gris,#5b6575)}
 .enlace-estado.oficial_directo{color:#25633A;font-weight:600}
-.como-ubicar{font-size:.9rem;margin:8px 0;background:#F4F6F9;padding:8px 10px;border-radius:6px}
+.como-ubicar a{display:inline;font-weight:400;margin:0}
+.como-ubicar{overflow-wrap:anywhere;word-break:break-word;font-size:.9rem;margin:8px 0;background:#F4F6F9;padding:8px 10px;border-radius:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .chips button{background:var(--azul-claro);color:var(--azul);border:0;border-radius:999px;padding:5px 14px;min-height:44px;font-size:.85rem;font-weight:600;cursor:pointer}
 
@@ -113,7 +115,7 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .datos td{padding:8px 0;border-top:1px solid var(--borde);word-break:break-word}
 .bloque{padding:16px 18px;margin-top:12px}
 .bloque h3{margin:0 0 8px;font-size:1.02rem;color:var(--navy)}
-.bloque p{margin:0;white-space:pre-line}
+.bloque p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
 .bloque.practica{background:var(--azul-claro);border-color:#C9DAF0}
 .texto-gris{color:var(--gris);font-size:.93rem}
 .enlaces a{display:block;font-weight:600;margin-bottom:6px}
@@ -178,6 +180,9 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   .pestanas button .beta{display:none}
   .boletin{padding:18px}
   .doc{padding:14px}
+  .datos th,.datos td{display:block;width:auto}
+  .datos th{padding:10px 0 0;border-top:1px solid var(--borde);font-size:.9rem}
+  .datos td{padding:2px 0 10px;border-top:0;font-size:1rem}
   .filtros:not(.abierto) > div:not(.f-buscar){display:none!important}
   .mas-filtros{display:block;grid-column:1/-1;width:100%;text-align:center}
   .mas-filtros[aria-expanded=true]{background:var(--azul-claro);border-color:#C9DAF0}
@@ -200,10 +205,10 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
     <h1>Repositorio de Jurisprudencia CGR</h1>
     <p>Dictámenes, normas y fallos sobre investigaciones sumarias y sumarios administrativos (Ley 18.834). Se actualiza los lunes, miércoles y viernes.</p>
     <nav class="pestanas" role="tablist" aria-label="Secciones">
-      <button type="button" role="tab" data-vista="repositorio" aria-selected="true">Repositorio</button>
-      <button type="button" role="tab" data-vista="boletines" aria-selected="false">Boletines</button>
-      <button type="button" role="tab" data-vista="plazos" aria-selected="false">Plazos</button>
-      <button type="button" role="tab" data-vista="abogado" aria-selected="false" id="tab-abogado" hidden>Abogado<span class="beta">beta</span></button>
+      <button type="button" role="tab" id="tab-repositorio" aria-controls="v-repositorio" data-vista="repositorio" aria-selected="true">Repositorio</button>
+      <button type="button" role="tab" id="tab-boletines" aria-controls="v-boletines" data-vista="boletines" aria-selected="false">Boletines</button>
+      <button type="button" role="tab" id="tab-plazos" aria-controls="v-plazos" data-vista="plazos" aria-selected="false">Plazos</button>
+      <button type="button" role="tab" data-vista="abogado" aria-controls="v-abogado" aria-selected="false" id="tab-abogado" hidden>Abogado<span class="beta">beta</span></button>
     </nav>
   </div>
 </header>
@@ -212,7 +217,7 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   <div id="aviso"></div>
   <div class="barra-estado"><span id="estado">Cargando…</span><button class="boton-sec" id="recargar" type="button">Actualizar</button><button class="boton-sec" id="copiar" type="button">Copiar tabla (CSV)</button></div>
 
-  <section id="v-repositorio">
+  <section id="v-repositorio" role="tabpanel" aria-labelledby="tab-repositorio">
     <div class="titulo-seccion"><h2>Documentos</h2><span id="cuenta" aria-live="polite"></span></div>
     <div class="panel etapas"><h3>Etapas del sumario</h3><p>Toca una etapa para ver los criterios que se aplican en ese momento del procedimiento.</p><div class="etapas-lista" id="etapas" role="group" aria-label="Filtrar por etapa"></div></div>
     <div class="filtros panel" id="filtros">
@@ -231,9 +236,9 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
     <div class="lista" id="lista"></div>
   </section>
 
-  <section id="v-boletines" hidden><div id="boletin"></div><div id="ediciones"></div></section>
+  <section id="v-boletines" role="tabpanel" aria-labelledby="tab-boletines" hidden><div id="boletin"></div><div id="ediciones"></div></section>
 
-  <section id="v-abogado" hidden>
+  <section id="v-abogado" role="tabpanel" aria-labelledby="tab-abogado" hidden>
     <div class="panel abogado-intro">
       <h2>Consulta al abogado<span class="beta">beta</span></h2>
       <p>Responde como un abogado experto en derecho administrativo y sumarios, usando los documentos de este repositorio. Es una función en prueba: revisa siempre el documento original antes de aplicar una respuesta.</p>
@@ -248,7 +253,7 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
     </div>
   </section>
 
-  <section id="v-plazos" class="plazos" hidden>
+  <section id="v-plazos" class="plazos" role="tabpanel" aria-labelledby="tab-plazos" hidden>
     <div class="panel"><table class="tabla-plazos"><caption>Investigación sumaria</caption>
       <thead><tr><th>Trámite</th><th>Plazo</th><th>Norma</th></tr></thead><tbody>
       <tr><th scope="row">Notificar al denunciante si se desestima su denuncia (art. 84 l y m)</th><td class="plazo">5 días</td><td class="norma">Art. 126, resolución fundada; puede reclamar por el art. 160</td></tr>
@@ -307,6 +312,8 @@ function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function fecha(d, largo){ if (!d) return ""; return new Date(d + "T12:00:00").toLocaleDateString("es-CL", largo ? {day:"numeric", month:"long", year:"numeric"} : {day:"numeric", month:"short", year:"numeric"}); }
 function safeUrl(u){ return /^https?:\/\//i.test(u || "") ? u : null; }
+/* Búsqueda sin distinguir tildes ni mayúsculas, y números con o sin puntos (22.204 = 22204) */
+function norm(s){ s = String(s == null ? "" : s).toLowerCase(); if (s.normalize) s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); return s.replace(/(\d)\.(?=\d)/g, "$1"); }
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
 function ordenFecha(r){ return r.fecha_documento || r.fecha_publicacion || ""; }
 var prioPeso = {alta:0, media:1, baja:2};
@@ -426,7 +433,7 @@ function opciones(){
 }
 
 function visibles(){
-  var q = $("#q").value.trim().toLowerCase(), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, o = $("#f-origen").value, kc = $("#f-cat").value, ks = $("#f-sub").value, s = mcp ? $("#f-seg").value : "";
+  var q = norm($("#q").value.trim()), t = $("#f-tipo").value, m = $("#f-materia").value, p = $("#f-prio").value, o = $("#f-origen").value, kc = $("#f-cat").value, ks = $("#f-sub").value, s = mcp ? $("#f-seg").value : "";
   var ed = null;
   if (edicionSel) { var b = bols.filter(function(x){ return x.fecha === edicionSel; })[0]; ed = b ? (b.dictamen_ids || []) : []; }
   var v = rows.filter(function(r){
@@ -441,7 +448,8 @@ function visibles(){
     if (o === "nuevo" && r.linea_base) return false;
     if (s && ((notas[r.id] && notas[r.id].estado) || "pendiente") !== s) return false;
     if (q) {
-      var h = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, r.organo, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" "), (r.subcategorias || []).map(nombreSub).join(" ")].join(" ").toLowerCase();
+      var h = [r.numero, r.titulo, r.resumen, r.criterio, r.consecuencias_practicas, r.organo, (r.articulos || []).join(" "), (r.materias || []).join(" "), (r.dictamenes_relacionados || []).join(" "), (r.subcategorias || []).map(nombreSub).join(" ")].join(" ");
+      h = norm(h);
       if (!q.split(/\s+/).every(function(w){ return h.indexOf(w) >= 0; })) return false;
     }
     return true;
@@ -493,6 +501,8 @@ var ESTADO_ENLACE = {
   secundaria: "Solo disponible en una fuente no oficial.",
   sin_enlace: "Sin enlace disponible."
 };
+/* Convierte en enlaces tocables las direcciones web escritas dentro de «Cómo ubicarlo» */
+function enlazar(t){ return esc(t).replace(/https?:\/\/[^\s<]+[^\s<.,;:)]/g, function(u){ return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>'; }); }
 function fila(t, v){ return v ? '<tr><th scope="row">' + t + '</th><td>' + esc(v) + '</td></tr>' : ""; }
 function abrir(id){
   var r = rows.filter(function(x){ return x.id === id; })[0]; if (!r) return;
@@ -514,7 +524,7 @@ function abrir(id){
     + '<div class="panel bloque enlaces"><h3>Documento original y fuente</h3>'
       + '<p class="enlace-estado ' + esc(r.enlace_estado || "") + '">' + esc(ESTADO_ENLACE[r.enlace_estado] || "") + '</p>'
       + (uo ? '<a href="' + esc(uo) + '" target="_blank" rel="noopener">' + (/pjud\.cl/.test(uo) ? "Abrir la consulta de causas del Poder Judicial" : r.enlace_estado === "oficial_busqueda" ? "Abrir el sitio oficial" : "Abrir el documento oficial") + '</a>' : '<p class="texto-gris">Sin enlace directo al original: búscalo en contraloria.cl o pjud.cl con el número indicado.</p>')
-      + (r.como_ubicar ? '<p class="como-ubicar"><strong>Cómo ubicarlo:</strong> ' + esc(r.como_ubicar) + '</p>' : "")
+      + (r.como_ubicar ? '<p class="como-ubicar"><strong>Cómo ubicarlo:</strong> ' + enlazar(r.como_ubicar) + '</p>' : "")
       + (uf ? '<a href="' + esc(uf) + '" target="_blank" rel="noopener">Ver la fuente complementaria (' + esc(r.fuente_nombre || "enlace") + ')</a>' : "") + '</div>'
     + (mcp ? '<div class="panel bloque"><h3>Mi seguimiento</h3><div class="nota">'
       + '<select id="n-estado" aria-label="Estado">' + ["pendiente","leído","aplicado","no aplica"].map(function(e){ return '<option value="' + e + '"' + (e === n.estado ? " selected" : "") + '>' + cap(e) + '</option>'; }).join("") + '</select>'
@@ -613,7 +623,7 @@ function nuevaConsulta(){ if (ctlAbogado) ctlAbogado.abort(); turnos = []; pinta
 function vista(v){
   var vistas = ["repositorio","boletines","plazos"]; if (sampleFn) vistas.push("abogado");
   if (vistas.indexOf(v) < 0) v = "repositorio";
-  document.querySelectorAll(".pestanas button").forEach(function(b){ b.setAttribute("aria-selected", b.getAttribute("data-vista") === v ? "true" : "false"); });
+  document.querySelectorAll(".pestanas button").forEach(function(b){ var sel = b.getAttribute("data-vista") === v; b.setAttribute("aria-selected", sel ? "true" : "false"); b.tabIndex = sel ? 0 : -1; });
   ["repositorio","boletines","plazos","abogado"].forEach(function(x){ $("#v-" + x).hidden = x !== v; });
 }
 document.querySelectorAll(".pestanas button").forEach(function(b){ b.onclick = function(){ var v = b.getAttribute("data-vista"); location.hash = v; vista(v); }; });
@@ -633,10 +643,25 @@ document.addEventListener("click", function(e){
 });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("#ficha").hidden) cerrar();
+  if (e.key === "Tab" && !$("#ficha").hidden) {
+    var fs = [].filter.call($("#ficha").querySelectorAll("button,a[href],select,textarea,input"), function(x){ return !x.disabled && x.offsetParent !== null; });
+    if (fs.length) {
+      var pri = fs[0], ult = fs[fs.length - 1], act = document.activeElement;
+      if (e.shiftKey && (act === pri || act === $("#ficha"))) { e.preventDefault(); ult.focus(); }
+      else if (!e.shiftKey && (act === ult || !$("#ficha").contains(act))) { e.preventDefault(); pri.focus(); }
+    }
+  }
+  if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && e.target.getAttribute && e.target.getAttribute("role") === "tab") {
+    var ts = [].filter.call(document.querySelectorAll(".pestanas button"), function(x){ return !x.hidden; });
+    var i = ts.indexOf(e.target), sig = ts[(i + (e.key === "ArrowRight" ? 1 : -1) + ts.length) % ts.length];
+    sig.focus(); sig.click();
+  }
   if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("doc")) { e.preventDefault(); abrir(e.target.getAttribute("data-id")); }
 });
 $("#f-cat").addEventListener("change", function(){ $("#f-sub").value = ""; opcionesSub(); });
-["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden","#f-cat","#f-sub"].forEach(function(s){ $(s).addEventListener("input", lista); $(s).addEventListener("change", lista); });
+/* El buscador se actualiza solo al escribir: si también lo hiciera al salir del campo (change), la lista se redibujaba justo al tocar un resultado y el toque se perdía */
+$("#q").addEventListener("input", lista);
+["#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden","#f-cat","#f-sub"].forEach(function(s){ $(s).addEventListener("change", lista); });
 $("#velo").onclick = cerrar;
 $("#mas-filtros").onclick = function(){ var f = $("#filtros"), a = !f.classList.contains("abierto"); f.classList.toggle("abierto", a); this.setAttribute("aria-expanded", a ? "true" : "false"); };
 $("#recargar").onclick = cargar;
