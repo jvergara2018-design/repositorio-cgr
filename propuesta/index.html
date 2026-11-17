@@ -69,6 +69,7 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .como-ubicar a{display:inline;font-weight:400;margin:0}
 .como-ubicar{overflow-wrap:anywhere;word-break:break-word;font-size:.9rem;margin:8px 0;background:#F4F6F9;padding:8px 10px;border-radius:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chips:empty{display:none}
 .chips button{background:var(--azul-claro);color:var(--azul);border:0;border-radius:999px;padding:5px 14px;min-height:44px;font-size:.85rem;font-weight:600;cursor:pointer}
 
 /* Etapas del sumario */
@@ -116,6 +117,9 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .bloque{padding:16px 18px;margin-top:12px}
 .bloque h3{margin:0 0 8px;font-size:1.02rem;color:var(--navy)}
 .bloque p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.relacionados{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.relacionados button{background:var(--azul-claro);border:0;border-radius:6px;padding:6px 12px;min-height:44px;font-size:.92rem;font-weight:600;color:var(--azul);cursor:pointer;text-align:left}
+.relacionados button:hover{text-decoration:underline}
 .bloque.practica{background:var(--azul-claro);border-color:#C9DAF0}
 .texto-gris{color:var(--gris);font-size:.93rem}
 .enlaces a{display:block;font-weight:600;margin-bottom:6px}
@@ -175,6 +179,17 @@ footer{color:var(--gris);font-size:.85rem;border-top:1px solid var(--borde);padd
   body{font-size:16px}
   .contenedor{padding-left:14px;padding-right:14px}
   .cabecera h1{font-size:1.3rem}
+  .cabecera p{display:none}
+  .cabecera .contenedor{padding-top:16px}
+  .cabecera h1{margin-bottom:10px}
+  main.contenedor{padding-top:16px}
+  .barra-estado{margin-bottom:12px}
+  #v-repositorio{display:flex;flex-direction:column}
+  #v-repositorio > .titulo-seccion{order:0}
+  #v-repositorio > .filtros{order:1}
+  #v-repositorio > .chips{order:2}
+  #v-repositorio > .etapas{order:3}
+  #v-repositorio > .lista{order:4}
   .pestanas{gap:0}
   .pestanas button{padding:10px 11px;font-size:.95rem}
   .pestanas button .beta{display:none}
@@ -308,12 +323,15 @@ var ETAPAS = ["Denuncia e inicio","Investigación","Medidas preventivas","Cargos
 var etapaSel = "";
 var mcp = null, sampleFn = null, rows = [], bols = [], notas = {}, edicionSel = null, ultimoFoco = null;
 var turnos = [], ctlAbogado = null, errorCarga = false;
+var pilaFichas = [], fichaActual = null, volviendo = false; /* navegación entre fichas relacionadas */
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function fecha(d, largo){ if (!d) return ""; return new Date(d + "T12:00:00").toLocaleDateString("es-CL", largo ? {day:"numeric", month:"long", year:"numeric"} : {day:"numeric", month:"short", year:"numeric"}); }
 function safeUrl(u){ return /^https?:\/\//i.test(u || "") ? u : null; }
 /* Búsqueda sin distinguir tildes ni mayúsculas, y números con o sin puntos (22.204 = 22204) */
 function norm(s){ s = String(s == null ? "" : s).toLowerCase(); if (s.normalize) s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); return s.replace(/(\d)\.(?=\d)/g, "$1"); }
+/* Texto de vista previa en la lista: si el resumen empieza con el encabezado técnico «FICHA: …», se muestra desde el primer párrafo narrativo */
+function extracto(t){ t = String(t || ""); var i = t.indexOf("\n\n"); return (/^FICHA:/.test(t) && i > 0) ? t.slice(i + 2) : t; }
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
 function ordenFecha(r){ return r.fecha_documento || r.fecha_publicacion || ""; }
 var prioPeso = {alta:0, media:1, baja:2};
@@ -470,7 +488,7 @@ function lista(){
       + '<div class="doc-top"><span class="etiqueta">' + esc(r.tipo) + '</span>' + (r.linea_base ? '<span class="etiqueta base">Línea base</span>' : "") + '<span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (est ? '<span class="seg">' + esc(cap(est)) + '</span>' : "") + '</div>'
       + '<h3>' + esc(r.titulo) + '</h3>'
       + '<p class="num"><strong>' + esc(r.numero || "Sin número") + '</strong>' + (f ? " · " + esc(f) : "") + '</p>'
-      + '<p class="res">' + esc(r.resumen) + '</p>'
+      + '<p class="res">' + esc(extracto(r.resumen)) + '</p>'
       + ((r.etapas || []).length ? '<div class="etapa-linea">Etapa: ' + esc(r.etapas.join(", ")) + '</div>' : "")
       + ((r.subcategorias || []).length ? '<div class="etapa-linea">Categoría: ' + esc(r.subcategorias.map(nombreSub).join(" · ")) + '</div>' : "")
       + (r.efecto_jurisprudencial ? '<div class="efecto' + (fuertes.indexOf(r.efecto_jurisprudencial) >= 0 ? " fuerte" : "") + '">' + esc(r.efecto_jurisprudencial) + '</div>' : "")
@@ -503,13 +521,32 @@ var ESTADO_ENLACE = {
 };
 /* Convierte en enlaces tocables las direcciones web escritas dentro de «Cómo ubicarlo» */
 function enlazar(t){ return esc(t).replace(/https?:\/\/[^\s<]+[^\s<.,;:)]/g, function(u){ return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>'; }); }
+/* Documentos relacionados: si están en el repositorio (por identificador o por número), se muestran como botones que abren su ficha */
+function buscarRelacionado(ref, propio){
+  var exacto = rows.filter(function(x){ return x.id === ref; })[0]; if (exacto) return exacto;
+  var k = norm(String(ref).replace(/\s*\(.*\)\s*$/, "")).trim(); if (k.length < 5) return null;
+  var re = new RegExp("(^|[^0-9a-z])" + k.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") + "($|[^0-9a-z])");
+  var m = rows.filter(function(x){ return x.id !== propio && re.test(norm(x.numero)); });
+  return m.length === 1 ? m[0] : null;
+}
+function relacionados(r){
+  var a = r.dictamenes_relacionados || []; if (!a.length) return "";
+  var en = [], fuera = [];
+  a.forEach(function(ref){ var x = buscarRelacionado(ref, r.id); if (x) { if (en.indexOf(x) < 0) en.push(x); } else fuera.push(ref); });
+  return '<div class="panel bloque"><h3>Dictámenes y causas relacionados</h3>'
+    + (en.length ? '<div class="relacionados">' + en.map(function(x){ return '<button type="button" data-id="' + esc(x.id) + '" aria-label="Abrir ficha: ' + esc(x.numero || x.titulo) + '">' + esc(x.numero || x.titulo) + '</button>'; }).join("") + '</div>' : "")
+    + (fuera.length ? '<p class="texto-gris">' + (en.length ? "Otros, aún no cargados en el repositorio: " : "") + esc(fuera.join(", ")) + '</p>' : "")
+    + '</div>';
+}
 function fila(t, v){ return v ? '<tr><th scope="row">' + t + '</th><td>' + esc(v) + '</td></tr>' : ""; }
 function abrir(id){
   var r = rows.filter(function(x){ return x.id === id; })[0]; if (!r) return;
-  ultimoFoco = document.activeElement;
+  if ($("#ficha").hidden) { ultimoFoco = document.activeElement; pilaFichas = []; }
+  else if (fichaActual && fichaActual !== id && !volviendo) pilaFichas.push(fichaActual);
+  fichaActual = id; volviendo = false;
   var n = notas[id] || {estado: "pendiente", nota: ""}, uo = safeUrl(r.url_original), uf = safeUrl(r.url_fuente);
   var lista2 = function(t, a){ return (a || []).length ? '<div class="panel bloque"><h3>' + t + '</h3><p class="texto-gris">' + esc(a.join(", ")) + '</p></div>' : ""; };
-  $("#ficha").innerHTML = '<div class="ficha-cab"><span>' + esc(r.tipo) + '</span><button type="button" id="cerrar">Cerrar</button></div>'
+  $("#ficha").innerHTML = '<div class="ficha-cab">' + (pilaFichas.length ? '<button type="button" id="volver" aria-label="Volver a la ficha anterior">← Volver</button>' : '<span>' + esc(r.tipo) + '</span>') + '<button type="button" id="cerrar">Cerrar</button></div>'
     + '<div class="ficha-cuerpo">'
     + '<div class="panel bloque"><div class="doc-top"><span class="prio ' + esc(r.prioridad) + '">Prioridad ' + esc(r.prioridad) + '</span>' + (r.efecto_jurisprudencial ? '<span class="etiqueta">' + esc(r.efecto_jurisprudencial) + '</span>' : "") + '</div>'
     + '<h2 id="ficha-titulo">' + esc(r.titulo) + '</h2>'
@@ -519,7 +556,7 @@ function abrir(id){
     + '<div class="panel bloque"><h3>Resumen</h3><p>' + esc(r.resumen) + '</p></div>'
     + (r.criterio ? '<div class="panel bloque"><h3>Criterio jurídico</h3><p>' + esc(r.criterio) + '</p></div>' : "")
     + (r.consecuencias_practicas ? '<div class="panel bloque practica"><h3>Qué significa para tus sumarios</h3><p>' + esc(r.consecuencias_practicas) + '</p></div>' : "")
-    + lista2("Artículos", r.articulos) + lista2("Dictámenes y causas relacionados", r.dictamenes_relacionados) + lista2("Materias", r.materias)
+    + lista2("Artículos", r.articulos) + relacionados(r) + lista2("Materias", r.materias)
     + (sampleFn ? '<div class="panel bloque"><h3>Consultar al abogado<span class="beta">beta</span></h3><p class="texto-gris">Pregunta cómo aplica este documento a un caso tuyo.</p><br><button class="boton" type="button" data-consultar="' + esc(r.id) + '">Consultar sobre este documento</button></div>' : "")
     + '<div class="panel bloque enlaces"><h3>Documento original y fuente</h3>'
       + '<p class="enlace-estado ' + esc(r.enlace_estado || "") + '">' + esc(ESTADO_ENLACE[r.enlace_estado] || "") + '</p>'
@@ -534,9 +571,11 @@ function abrir(id){
   $("#ficha").hidden = false; $("#velo").hidden = false; document.body.style.overflow = "hidden";
   $("#ficha").scrollTop = 0; $("#ficha").focus();
   $("#cerrar").onclick = cerrar;
+  if ($("#volver")) $("#volver").onclick = function(){ volviendo = true; abrir(pilaFichas.pop()); };
   if (mcp) $("#n-guardar").onclick = function(){ guardarNota(id); };
 }
 function cerrar(){
+  pilaFichas = []; fichaActual = null;
   $("#ficha").hidden = true; $("#velo").hidden = true; document.body.style.overflow = "";
   if (ultimoFoco && ultimoFoco.focus) ultimoFoco.focus();
 }
@@ -625,6 +664,7 @@ function vista(v){
   if (vistas.indexOf(v) < 0) v = "repositorio";
   document.querySelectorAll(".pestanas button").forEach(function(b){ var sel = b.getAttribute("data-vista") === v; b.setAttribute("aria-selected", sel ? "true" : "false"); b.tabIndex = sel ? 0 : -1; });
   ["repositorio","boletines","plazos","abogado"].forEach(function(x){ $("#v-" + x).hidden = x !== v; });
+  $("#copiar").hidden = v !== "repositorio";
 }
 document.querySelectorAll(".pestanas button").forEach(function(b){ b.onclick = function(){ var v = b.getAttribute("data-vista"); location.hash = v; vista(v); }; });
 window.addEventListener("hashchange", function(){ vista(location.hash.slice(1)); });
