@@ -54,6 +54,8 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .boletin ul{margin:0;padding-left:20px}
 .boletin li{margin-bottom:6px;font-size:.95rem}
 .boletin .acciones{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+.boletin h4.grupo,.edicion h4.grupo{margin:12px 0 6px;font-size:.9rem;font-weight:700;letter-spacing:.03em;color:var(--gris)}
+.boletin h3 + h4.grupo,.edicion h4 + h4.grupo{margin-top:2px}
 
 /* Filtros */
 .titulo-seccion{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 12px}
@@ -102,6 +104,7 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .doc .efecto.fuerte{color:var(--rojo)}
 .doc .seg{margin-left:auto;font-size:.82rem;font-weight:600;color:var(--azul)}
 .vacio{padding:36px 20px;text-align:center;color:var(--gris)}
+.mas-docs{display:block;width:100%;margin-top:2px;font-size:1rem}
 
 /* Ficha */
 .velo{position:fixed;inset:0;background:rgba(19,42,79,.45);z-index:20}
@@ -135,6 +138,10 @@ main.contenedor{padding-top:24px;padding-bottom:60px}
 .edicion h4{margin:14px 0 6px;font-size:.98rem;color:var(--navy)}
 .edicion p{margin:0;white-space:pre-line}
 .edicion .docs{display:flex;flex-wrap:wrap;gap:6px}
+.edicion ul{margin:0;padding-left:20px}
+.edicion li{margin-bottom:6px;font-size:.95rem}
+.edicion .ver-detalle{margin-top:14px}
+.edicion .detalle{border-top:1px solid var(--borde);margin-top:14px;padding-top:4px}
 .edicion .docs button{background:var(--azul-claro);border:0;border-radius:6px;padding:5px 12px;min-height:44px;font-size:.88rem;font-weight:600;color:var(--azul);cursor:pointer}
 
 /* Plazos */
@@ -323,6 +330,7 @@ var ETAPAS = ["Denuncia e inicio","Investigación","Medidas preventivas","Cargos
 var etapaSel = "";
 var mcp = null, sampleFn = null, rows = [], bols = [], notas = {}, edicionSel = null, ultimoFoco = null;
 var turnos = [], ctlAbogado = null, errorCarga = false;
+var TANDA = 40, tope = TANDA; /* la lista muestra los documentos por tandas de 40 */
 var pilaFichas = [], fichaActual = null, volviendo = false; /* navegación entre fichas relacionadas */
 function $(s){ return document.querySelector(s); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
@@ -391,6 +399,16 @@ function render(){ boletin(); opciones(); lista(); ediciones(); opcionesAbogado(
 
 function lineas(t){ return (t || "").split("\n").map(function(s){ return s.replace(/^[•\-\s]+|^\d+\)\s*/g, "").trim(); }).filter(Boolean); }
 
+/* En «Lo más importante» y «Qué revisar», las líneas escritas en mayúsculas (CONTRALORÍA…, PODER JUDICIAL…) son subtítulos, no viñetas */
+function esGrupo(x){ var y = x.replace(/\([^)]*\)/g, "").trim(); return y.length >= 4 && y.length <= 80 && y === y.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{4}/.test(y); }
+function listaBoletin(t){
+  var html = "", abierta = false;
+  lineas(t).forEach(function(x){
+    if (esGrupo(x)) { if (abierta) html += "</ul>"; abierta = false; html += '<h4 class="grupo">' + esc(x) + '</h4>'; }
+    else { if (!abierta) html += "<ul>"; abierta = true; html += "<li>" + esc(x) + "</li>"; }
+  });
+  return html + (abierta ? "</ul>" : "");
+}
 function boletin(){
   var b = bols[0];
   if (!b) { $("#boletin").innerHTML = ""; return; }
@@ -400,8 +418,8 @@ function boletin(){
     + '<h2>' + esc(b.titulo) + '</h2>'
     + '<p class="resumen">' + esc(b.resumen) + '</p>'
     + ((dest.length || al.length) ? '<div class="boletin-cols">'
-        + (dest.length ? '<div><h3>Lo más importante</h3><ul>' + dest.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : "")
-        + (al.length ? '<div><h3>Qué revisar en tus sumarios</h3><ul>' + al.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : "")
+        + (dest.length ? '<div><h3>Lo más importante</h3>' + listaBoletin(b.destacados) + '</div>' : "")
+        + (al.length ? '<div><h3>Qué revisar en tus sumarios</h3>' + listaBoletin(b.alertas) + '</div>' : "")
       + '</div>' : "")
     + '<div class="acciones">' + (n ? '<button class="boton" type="button" data-edicion="' + esc(b.fecha) + '">Ver los ' + n + ' documentos de este boletín</button>' : "")
     + '</div>'
@@ -481,7 +499,7 @@ function lista(){
   $("#cuenta").textContent = v.length === rows.length ? rows.length + " en total" : v.length + " de " + rows.length;
   $("#chips").innerHTML = edicionSel ? '<button type="button" data-quitar>Boletín del ' + esc(fecha(edicionSel)) + '  ✕</button>' : "";
   var fuertes = ["Deja sin efecto", "Modifica criterio", "Nuevo criterio"];
-  $("#lista").innerHTML = v.length ? v.map(function(r){
+  $("#lista").innerHTML = v.length ? v.slice(0, tope).map(function(r){
     var est = mcp ? ((notas[r.id] && notas[r.id].estado) || "pendiente") : "";
     var f = fecha(ordenFecha(r));
     return '<article class="panel doc p-' + esc(r.prioridad) + '" data-id="' + esc(r.id) + '" tabindex="0" role="button" aria-label="Abrir ficha: ' + esc(r.titulo) + '">'
@@ -493,9 +511,11 @@ function lista(){
       + ((r.subcategorias || []).length ? '<div class="etapa-linea">Categoría: ' + esc(r.subcategorias.map(nombreSub).join(" · ")) + '</div>' : "")
       + (r.efecto_jurisprudencial ? '<div class="efecto' + (fuertes.indexOf(r.efecto_jurisprudencial) >= 0 ? " fuerte" : "") + '">' + esc(r.efecto_jurisprudencial) + '</div>' : "")
       + '</article>';
-  }).join("") : '<div class="panel vacio">' + (rows.length ? 'Ningún documento cumple los filtros elegidos.<br><br><button class="boton-sec" type="button" data-limpiar>Quitar filtros</button>' : errorCarga ? 'No se pudieron cargar los documentos.<br><br><button class="boton" type="button" data-reintentar>Reintentar</button>' : "Todavía no hay documentos cargados.") + '</div>';
+  }).join("") + (v.length > tope ? '<button type="button" class="boton-sec mas-docs" data-mas>Mostrar ' + Math.min(TANDA, v.length - tope) + ' más (quedan ' + (v.length - tope) + ')</button>' : "") : '<div class="panel vacio">' + (rows.length ? 'Ningún documento cumple los filtros elegidos.<br><br><button class="boton-sec" type="button" data-limpiar>Quitar filtros</button>' : errorCarga ? 'No se pudieron cargar los documentos.<br><br><button class="boton" type="button" data-reintentar>Reintentar</button>' : "Todavía no hay documentos cargados.") + '</div>';
   contarFiltros();
 }
+/* Al cambiar la búsqueda o un filtro, la lista vuelve a mostrar solo la primera tanda */
+function filtrar(){ tope = TANDA; lista(); }
 
 function contarFiltros(){
   var n = ["#f-cat","#f-sub","#f-materia","#f-tipo","#f-prio","#f-origen"].concat(mcp ? ["#f-seg"] : []).filter(function(s){ return $(s).value; }).length;
@@ -503,11 +523,15 @@ function contarFiltros(){
 }
 function ediciones(){
   var ant = bols.slice(1);
-  $("#ediciones").innerHTML = !bols.length ? '<div class="panel vacio">Aún no hay boletines publicados.</div>' : !ant.length ? "" : '<div class="titulo-seccion"><h2>Boletines anteriores</h2></div>' + ant.map(function(b){
+  /* Boletines anteriores plegados: se ven fecha, título y resumen; el detalle se abre con un botón */
+  $("#ediciones").innerHTML = !bols.length ? '<div class="panel vacio">Aún no hay boletines publicados.</div>' : !ant.length ? "" : '<div class="titulo-seccion"><h2>Boletines anteriores</h2><span>' + ant.length + '</span></div>' + ant.map(function(b, i){
+    var docs = (b.dictamen_ids || []).map(function(id){ var r = rows.filter(function(x){ return x.id === id; })[0]; return r ? '<button type="button" data-id="' + esc(id) + '">' + esc(r.numero || r.titulo) + '</button>' : ""; }).join("");
+    var nd = (b.dictamen_ids || []).length, rot = "Ver detalle" + (nd ? " y los " + nd + " documentos" : "");
+    var det = (lineas(b.destacados).length ? '<h4>Lo más importante</h4>' + listaBoletin(b.destacados) : "")
+      + (lineas(b.alertas).length ? '<h4>Qué revisar en tus sumarios</h4>' + listaBoletin(b.alertas) : "")
+      + (docs ? '<h4>Documentos de este boletín</h4><div class="docs">' + docs + '</div>' : "");
     return '<article class="panel edicion"><p class="meta">' + esc(fecha(b.fecha, true)) + '</p><h3>' + esc(b.titulo) + '</h3><p>' + esc(b.resumen) + '</p>'
-      + (b.destacados ? '<h4>Lo más importante</h4><p>' + esc(b.destacados) + '</p>' : "")
-      + (b.alertas ? '<h4>Qué revisar en tus sumarios</h4><p>' + esc(b.alertas) + '</p>' : "")
-      + ((b.dictamen_ids || []).length ? '<h4>Documentos de este boletín</h4><div class="docs">' + b.dictamen_ids.map(function(id){ var r = rows.filter(function(x){ return x.id === id; })[0]; return r ? '<button type="button" data-id="' + esc(id) + '">' + esc(r.numero || r.titulo) + '</button>' : ""; }).join("") + '</div>' : "")
+      + (det ? '<button type="button" class="boton-sec ver-detalle" data-detalle="' + esc(rot) + '" aria-expanded="false" aria-controls="det-' + i + '">' + esc(rot) + '</button><div class="detalle" id="det-' + i + '" hidden>' + det + '</div>' : "")
       + '</article>';
   }).join("");
 }
@@ -670,16 +694,19 @@ document.querySelectorAll(".pestanas button").forEach(function(b){ b.onclick = f
 window.addEventListener("hashchange", function(){ vista(location.hash.slice(1)); });
 document.addEventListener("click", function(e){
   var te = e.target.closest("[data-etapa]");
-  if (te) { etapaSel = te.getAttribute("data-etapa"); pintarEtapas(); return lista(); }
+  if (te) { etapaSel = te.getAttribute("data-etapa"); pintarEtapas(); return filtrar(); }
+  if (e.target.closest("[data-mas]")) { var antes = tope; tope += TANDA; lista(); var sig = document.querySelectorAll("#lista .doc")[antes]; if (sig) sig.focus({preventScroll: true}); return; }
+  var dd = e.target.closest("[data-detalle]");
+  if (dd) { var cj = document.getElementById(dd.getAttribute("aria-controls")), ab = cj.hidden; cj.hidden = !ab; dd.setAttribute("aria-expanded", ab ? "true" : "false"); dd.textContent = ab ? "Ocultar detalle" : dd.getAttribute("data-detalle"); return; }
   if (e.target.closest("[data-reintentar]")) return cargar();
   var t = e.target.closest("[data-id],[data-edicion],[data-ir],[data-quitar],[data-limpiar],[data-consultar],[data-sugerencia]"); if (!t) return;
   if (t.hasAttribute("data-consultar")) { cerrar(); $("#ctx").value = t.getAttribute("data-consultar"); nuevaConsulta(); location.hash = "abogado"; vista("abogado"); return $("#pregunta").focus(); }
   if (t.hasAttribute("data-sugerencia")) { $("#pregunta").value = t.getAttribute("data-sugerencia"); return preguntar(); }
   if (t.hasAttribute("data-id")) return abrir(t.getAttribute("data-id"));
-  if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); location.hash = "repositorio"; vista("repositorio"); lista(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
+  if (t.hasAttribute("data-edicion")) { edicionSel = t.getAttribute("data-edicion"); location.hash = "repositorio"; vista("repositorio"); filtrar(); return $(".titulo-seccion").scrollIntoView({block: "start"}); }
   if (t.hasAttribute("data-ir")) { var v = t.getAttribute("data-ir"); location.hash = v; return vista(v); }
-  if (t.hasAttribute("data-quitar")) { edicionSel = null; return lista(); }
-  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-cat"].forEach(function(s){ $(s).value = ""; }); opcionesSub(); lista(); }
+  if (t.hasAttribute("data-quitar")) { edicionSel = null; return filtrar(); }
+  if (t.hasAttribute("data-limpiar")) { edicionSel = null; etapaSel = ""; pintarEtapas(); ["#q","#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-cat"].forEach(function(s){ $(s).value = ""; }); opcionesSub(); filtrar(); }
 });
 document.addEventListener("keydown", function(e){
   if (e.key === "Escape" && !$("#ficha").hidden) cerrar();
@@ -700,8 +727,8 @@ document.addEventListener("keydown", function(e){
 });
 $("#f-cat").addEventListener("change", function(){ $("#f-sub").value = ""; opcionesSub(); });
 /* El buscador se actualiza solo al escribir: si también lo hiciera al salir del campo (change), la lista se redibujaba justo al tocar un resultado y el toque se perdía */
-$("#q").addEventListener("input", lista);
-["#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden","#f-cat","#f-sub"].forEach(function(s){ $(s).addEventListener("change", lista); });
+$("#q").addEventListener("input", filtrar);
+["#f-tipo","#f-materia","#f-prio","#f-origen","#f-seg","#f-orden","#f-cat","#f-sub"].forEach(function(s){ $(s).addEventListener("change", filtrar); });
 $("#velo").onclick = cerrar;
 $("#mas-filtros").onclick = function(){ var f = $("#filtros"), a = !f.classList.contains("abierto"); f.classList.toggle("abierto", a); this.setAttribute("aria-expanded", a ? "true" : "false"); };
 $("#recargar").onclick = cargar;
